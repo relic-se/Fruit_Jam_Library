@@ -360,11 +360,17 @@ def show_page(page: int = 0) -> None:
 
         full_name = applications[selected_category][index]
         repo_owner, repo_name = full_name.split("/")
+
+        # format title from repository name
+        title = repo_name.replace("-", " ").replace("_", " ").strip()
+        title = " ".join(map(lambda word: word[0].upper() + word[1:].lower(), title.split(" ")))
+        if title.startswith("Fruit Jam"):
+            title = title[len("Fruit Jam"):].strip()
         
         # set default details
         item_icon.bitmap = default_icon_bmp
         item_icon.pixel_shader = default_icon_palette
-        item_title.text = repo_name
+        item_title.text = title
         item_author.text = repo_owner
         item_description.text = "Loading..."
         item_group.hidden = False
@@ -391,8 +397,6 @@ def show_page(page: int = 0) -> None:
         # read metadata from repository
         status_label.text = "Reading metadata from {:s}".format(full_name)
         display.refresh()
-        title = repository["name"]
-        icon = None
         try:
             metadata = download_json(
                 url=METADATA_URL.format(full_name),
@@ -402,7 +406,7 @@ def show_page(page: int = 0) -> None:
             status_label.text = "Unable to read metadata from {:s}! {:s}".format(full_name, str(e))
             display.refresh()
         else:
-            title = metadata["title"]
+            item_title.text = metadata["title"]
             if "icon" in metadata:
                 icon = metadata["icon"]
         finally:
