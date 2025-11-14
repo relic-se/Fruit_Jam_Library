@@ -358,6 +358,16 @@ def show_page(page: int = 0) -> None:
         item_icon, item_title, item_author, item_description = item_group
 
         full_name = applications[selected_category][index]
+        repo_owner, repo_name = full_name.split("/")
+        
+        # set default details
+        item_icon.bitmap = default_icon_bmp
+        item_icon.pixel_shader = default_icon_palette
+        item_title.text = repo_name
+        item_author.text = repo_owner
+        item_description.text = "Loading..."
+        item_group.hidden = False
+
         status_label.text = "Reading repository data from {:s}".format(full_name)
         display.refresh()
 
@@ -368,6 +378,7 @@ def show_page(page: int = 0) -> None:
                 name=full_name.replace("/", "_"),
             )
         except (OSError, ValueError) as e:
+            item_description.text = ""
             status_label.text = "Unable to read repository data from {:s}! {:s}".format(full_name, str(e))
             display.refresh()
             time.sleep(1)
@@ -408,18 +419,10 @@ def show_page(page: int = 0) -> None:
             except (OSError, ValueError) as e:
                 status_label.text = "Unable to download icon image from {:s}! {:s}".format(full_name, str(e))
                 display.refresh()
-                item_icon.bitmap = default_icon_bmp
-                item_icon.pixel_shader = default_icon_palette
             else:
                 icon_bmp, icon_palette = adafruit_imageload.load(icon_path)
                 item_icon.bitmap = icon_bmp
                 item_icon.pixel_shader = icon_palette
-
-        else:
-            item_icon.bitmap = default_icon_bmp
-            item_icon.pixel_shader = default_icon_palette
-
-        item_group.hidden = False
 
         # cleanup before loading next item
         gc.collect()
