@@ -1,0 +1,5 @@
+adafruit_display_text
+adafruit_fruitjam
+adafruit_pathlib
+adafruit_usb_host_mouse
+asyncio
