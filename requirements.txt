@@ -1,5 +1,10 @@
+adafruit_anchored_group
+adafruit_anchored_tilegrid
+adafruit_button
 adafruit_display_text
+adafruit_displayio_layout
 adafruit_fruitjam
+adafruit_imageload
 adafruit_pathlib
 adafruit_usb_host_mouse
 asyncio
