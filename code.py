@@ -46,6 +46,12 @@ try:
 except ImportError:
     config = None
 
+bg_palette = displayio.Palette(1)
+bg_palette[0] = config.palette_bg if config is not None else 0x222222
+
+fg_palette = displayio.Palette(1)
+fg_palette[0] = config.palette_fg if config is not None else 0xffffff
+
 # setup display
 displayio.release_displays()
 try:
@@ -99,12 +105,27 @@ GRID_HEIGHT = display.height - TITLE_HEIGHT * SCALE - MENU_HEIGHT * SCALE - GRID
 ITEM_WIDTH = GRID_WIDTH // PAGE_COLUMNS
 ITEM_HEIGHT = GRID_HEIGHT // PAGE_ROWS
 
+DIALOG_MARGIN = 16
+DIALOG_BORDER = 2
+DIALOG_WIDTH = DISPLAY_WIDTH - DIALOG_MARGIN * 2 - (ARROW_MARGIN + left_bmp.width) * 2
+DIALOG_HEIGHT = DISPLAY_HEIGHT - TITLE_HEIGHT - DIALOG_MARGIN * 2 - STATUS_HEIGHT // SCALE
+DIALOG_BUTTON_WIDTH = DIALOG_WIDTH // 4
+
+BUTTON_PROPS = {
+    "height": MENU_HEIGHT,
+    "label_font": FONT,
+    "style": Button.ROUNDRECT,
+    "fill_color": (config.palette_bg if config is not None else 0x222222),
+    "label_color": (config.palette_fg if config is not None else 0xffffff),
+    "outline_color": (config.palette_fg if config is not None else 0xffffff),
+    "selected_fill": (config.palette_fg if config is not None else 0xffffff),
+    "selected_label": (config.palette_bg if config is not None else 0x222222),
+}
+
 # create groups
 root_group = displayio.Group()
 display.root_group = root_group
 
-bg_palette = displayio.Palette(1)
-bg_palette[0] = config.palette_bg if config is not None else 0x222222
 bg_tg = displayio.TileGrid(
     bitmap=displayio.Bitmap(display.width, display.height, 1),
     pixel_shader=bg_palette,
@@ -128,11 +149,9 @@ scaled_group.append(title_label)
 status_group = displayio.Group()
 root_group.append(status_group)
 
-status_bg_palette = displayio.Palette(1)
-status_bg_palette[0] = config.palette_fg if config is not None else 0xffffff
 status_bg_tg = displayio.TileGrid(
     bitmap=displayio.Bitmap(display.width, STATUS_HEIGHT, 1),
-    pixel_shader=status_bg_palette,
+    pixel_shader=fg_palette,
     y=display.height - STATUS_HEIGHT,
 )
 status_group.append(status_bg_tg)
@@ -205,15 +224,8 @@ for index, category in enumerate(categories):
         x=(MENU_WIDTH + MENU_GAP) * index + MENU_GAP,
         y=TITLE_HEIGHT,
         width=MENU_WIDTH,
-        height=MENU_HEIGHT,
         label=category,
-        label_font=FONT,
-        style=Button.ROUNDRECT,
-        fill_color=(config.palette_bg if config is not None else 0x222222),
-        label_color=(config.palette_fg if config is not None else 0xffffff),
-        outline_color=(config.palette_fg if config is not None else 0xffffff),
-        selected_fill=(config.palette_fg if config is not None else 0xffffff),
-        selected_label=(config.palette_bg if config is not None else 0x222222),
+        **BUTTON_PROPS,
     )
     category_group.append(category_button)
 
@@ -297,22 +309,58 @@ right_tg.anchor_point = (1.0, 0.5)
 right_tg.anchored_position = (DISPLAY_WIDTH, (DISPLAY_HEIGHT // 2) - 2)
 scaled_group.append(right_tg)
 
-def select_category(name: str) -> None:
-    global categories, item_grid, selected_category
-    if name not in categories or name == selected_category:
-        return
-    selected_category = name
+# setup dialog
+dialog_group = displayio.Group()
+dialog_group.hidden = True
+scaled_group.append(dialog_group)
 
-    # update button states
-    for category_button in category_group:
-        category_button.selected = category_button.label == name
-    
-    # hide all items
-    for index in range(PAGE_SIZE):
-        item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS)).hidden = True
+dialog_border = displayio.TileGrid(
+    bitmap=displayio.Bitmap(DIALOG_WIDTH, DIALOG_HEIGHT, 1),
+    pixel_shader=fg_palette,
+    x=(DISPLAY_WIDTH - DIALOG_WIDTH) // 2,
+    y=TITLE_HEIGHT + DIALOG_MARGIN,
+)
+dialog_group.append(dialog_border)
 
-    # load first page of items
-    show_page()
+dialog_bg = displayio.TileGrid(
+    bitmap=displayio.Bitmap(DIALOG_WIDTH - DIALOG_BORDER * 2, DIALOG_HEIGHT - DIALOG_BORDER * 2, 1),
+    pixel_shader=bg_palette,
+    x=dialog_border.x + DIALOG_BORDER,
+    y=dialog_border.y + DIALOG_BORDER,
+)
+dialog_group.append(dialog_bg)
+
+dialog_content = TextBox(
+    font=FONT,
+    text="[content]",
+    width=DIALOG_WIDTH - DIALOG_BORDER * 2 - DIALOG_MARGIN * 2,
+    height=DIALOG_HEIGHT - DIALOG_BORDER * 2 - DIALOG_MARGIN * 3 - MENU_HEIGHT,
+    align=TextBox.ALIGN_CENTER,
+    color=(config.palette_fg if config is not None else 0xffffff),
+    x=dialog_bg.x + DIALOG_MARGIN,
+    y=dialog_bg.y + DIALOG_MARGIN,
+)
+dialog_group.append(dialog_content)
+
+dialog_no = Button(
+    x=dialog_border.x + (DIALOG_WIDTH - DIALOG_MARGIN) // 2 - DIALOG_BUTTON_WIDTH,
+    y=dialog_border.y + DIALOG_HEIGHT - DIALOG_BORDER - DIALOG_MARGIN - MENU_HEIGHT,
+    width=DIALOG_BUTTON_WIDTH,
+    label="No",
+    **BUTTON_PROPS,
+)
+dialog_group.append(dialog_no)
+
+dialog_yes = Button(
+    x=dialog_border.x + (DIALOG_WIDTH + DIALOG_MARGIN) // 2,
+    y=dialog_no.y,
+    width=DIALOG_BUTTON_WIDTH,
+    label="Yes",
+    **BUTTON_PROPS,
+)
+dialog_group.append(dialog_yes)
+
+# file download + caching
 
 def _download_file(url: str, extension: str, name: str|None = None) -> str:
     if not extension.startswith("."):
@@ -348,6 +396,25 @@ def download_json(url: str, name: str|None = None) -> str:
     with open(path, "r") as f:
         data = json.loads(f.read())
     return data
+
+# item navigation
+
+def select_category(name: str) -> None:
+    global categories, item_grid, selected_category
+    if name not in categories or name == selected_category:
+        return
+    selected_category = name
+
+    # update button states
+    for category_button in category_group:
+        category_button.selected = category_button.label == name
+    
+    # hide all items
+    for index in range(PAGE_SIZE):
+        item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS)).hidden = True
+
+    # load first page of items
+    show_page()
 
 current_page = 0
 def show_page(page: int = 0) -> None:
@@ -465,9 +532,62 @@ def previous_page() -> None:
 # select first category and show page items
 select_category(categories[0])
 
+# application download
+
+selected_application = None
+def select_application(index: int) -> None:
+    global categories, selected_category, current_page, selected_application, dialog_content, dialog_group
+
+    index += current_page * PAGE_SIZE
+    if index < 0 or index >= len(applications[selected_category]):
+        return
+    
+    selected_application = applications[selected_category][index]
+    repo_owner, repo_name = selected_application.split("/")
+    
+    # hide other UI elements
+    category_group.hidden = True
+    item_grid.hidden = True
+    left_tg.hidden = True
+    right_tg.hidden = True
+    
+    # populate dialog info
+    page_index = index % PAGE_SIZE
+    item_group = item_grid.get_content((page_index % PAGE_COLUMNS, page_index // PAGE_COLUMNS))
+    item_icon, item_title, item_author, item_description = item_group
+
+    dialog_content.text = "Would you like to download and install \"{:s}\" by {:s} to your SD card at /sd/apps/{:s}?".format(
+        item_title.text,
+        item_author.text,
+        repo_name
+    )
+
+    dialog_group.hidden = False
+
+def deselect_application() -> None:
+    # invalidate selection
+    global selected_application
+    selected_application = None
+
+    # hide dialog
+    dialog_group.hidden = True
+
+    # show other UI elements
+    category_group.hidden = False
+    item_grid.hidden = False
+    left_tg.hidden = False
+    right_tg.hidden = False
+
+def download_application() -> None:
+    global selected_application
+    if selected_application is None:
+        return
+    
+    print("Downloading?")
+
 # mouse control
 async def mouse_task() -> None:
-    global selected_category, categories, category_group, root_group, right_tg, left_tg
+    global selected_category, categories, category_group, root_group, right_tg, left_tg, selected_application
     while True:
         if (mouse := adafruit_usb_host_mouse.find_and_init_boot_mouse()) is not None:
             mouse.x = DISPLAY_WIDTH // 2
@@ -481,18 +601,22 @@ async def mouse_task() -> None:
                     timeouts = 0
                     mouse_state = "left" in mouse.pressed_btns
                     if mouse_state and not previous_mouse_state:
-                        if (clicked_cell := item_grid.which_cell_contains((mouse.x * SCALE, mouse.y * SCALE))) is not None:
-                            index = current_page * PAGE_SIZE + clicked_cell[1] * PAGE_COLUMNS + clicked_cell[0]
-                            print("clicked: {:d}".format(index))
-                        elif right_tg.contains((mouse.x, mouse.y, 0)):
-                            next_page()
-                        elif left_tg.contains((mouse.x, mouse.y, 0)):
-                            previous_page()
-                        else:
-                            for button in category_group:
-                                if button.contains((mouse.x, mouse.y)):
-                                    select_category(button.label)
-                                    break
+                        if dialog_group.hidden:
+                            if (clicked_cell := item_grid.which_cell_contains((mouse.x * SCALE, mouse.y * SCALE))) is not None:
+                                select_application(clicked_cell[1] * PAGE_COLUMNS + clicked_cell[0])
+                            elif right_tg.contains((mouse.x, mouse.y, 0)):
+                                next_page()
+                            elif left_tg.contains((mouse.x, mouse.y, 0)):
+                                previous_page()
+                            else:
+                                for button in category_group:
+                                    if button.contains((mouse.x, mouse.y)):
+                                        select_category(button.label)
+                                        break
+                        elif dialog_yes.contains((mouse.x, mouse.y, 0)):
+                            download_application()
+                        elif dialog_no.contains((mouse.x, mouse.y, 0)):
+                            deselect_application()
                     previous_mouse_state = mouse_state
                 else:
                     timeouts += 1
