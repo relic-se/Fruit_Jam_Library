@@ -99,6 +99,17 @@ GRID_HEIGHT = display.height - TITLE_HEIGHT * SCALE - MENU_HEIGHT * SCALE - GRID
 ITEM_WIDTH = GRID_WIDTH // PAGE_COLUMNS
 ITEM_HEIGHT = GRID_HEIGHT // PAGE_ROWS
 
+BUTTON_PROPS = {
+    "height": MENU_HEIGHT,
+    "label_font": FONT,
+    "style": Button.ROUNDRECT,
+    "fill_color": (config.palette_bg if config is not None else 0x222222),
+    "label_color": (config.palette_fg if config is not None else 0xffffff),
+    "outline_color": (config.palette_fg if config is not None else 0xffffff),
+    "selected_fill": (config.palette_fg if config is not None else 0xffffff),
+    "selected_label": (config.palette_bg if config is not None else 0x222222),
+}
+
 # create groups
 root_group = displayio.Group()
 display.root_group = root_group
@@ -201,15 +212,8 @@ for index, category in enumerate(categories):
         x=(MENU_WIDTH + MENU_GAP) * index + MENU_GAP,
         y=TITLE_HEIGHT,
         width=MENU_WIDTH,
-        height=MENU_HEIGHT,
         label=category,
-        label_font=FONT,
-        style=Button.ROUNDRECT,
-        fill_color=(config.palette_bg if config is not None else 0x222222),
-        label_color=(config.palette_fg if config is not None else 0xffffff),
-        outline_color=(config.palette_fg if config is not None else 0xffffff),
-        selected_fill=(config.palette_fg if config is not None else 0xffffff),
-        selected_label=(config.palette_bg if config is not None else 0x222222),
+        **BUTTON_PROPS,
     )
     category_group.append(category_button)
 
