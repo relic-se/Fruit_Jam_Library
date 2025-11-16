@@ -46,6 +46,12 @@ try:
 except ImportError:
     config = None
 
+bg_palette = displayio.Palette(1)
+bg_palette[0] = config.palette_bg if config is not None else 0x222222
+
+fg_palette = displayio.Palette(1)
+fg_palette[0] = config.palette_fg if config is not None else 0xffffff
+
 # setup display
 displayio.release_displays()
 try:
@@ -97,8 +103,6 @@ ITEM_HEIGHT = GRID_HEIGHT // PAGE_ROWS
 root_group = displayio.Group()
 display.root_group = root_group
 
-bg_palette = displayio.Palette(1)
-bg_palette[0] = config.palette_bg if config is not None else 0x222222
 bg_tg = displayio.TileGrid(
     bitmap=displayio.Bitmap(display.width, display.height, 1),
     pixel_shader=bg_palette,
@@ -122,11 +126,9 @@ scaled_group.append(title_label)
 status_group = displayio.Group()
 root_group.append(status_group)
 
-status_bg_palette = displayio.Palette(1)
-status_bg_palette[0] = config.palette_fg if config is not None else 0xffffff
 status_bg_tg = displayio.TileGrid(
     bitmap=displayio.Bitmap(display.width, STATUS_HEIGHT, 1),
-    pixel_shader=status_bg_palette,
+    pixel_shader=fg_palette,
     y=display.height - STATUS_HEIGHT,
 )
 status_group.append(status_bg_tg)
