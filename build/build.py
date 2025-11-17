@@ -22,6 +22,7 @@ ASSET_DIRS = (
 SRC_FILES = (
     "boot.py",
     "code.py",
+    "zipfile.py",
     "icon.bmp",
     "metadata.json"
 )

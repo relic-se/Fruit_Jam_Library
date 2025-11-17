@@ -33,11 +33,96 @@ from adafruit_portalbase.network import HttpError
 import adafruit_usb_host_mouse
 import asyncio
 
+from zipfile import ZipFile
+
 # program constants
 APPLICATIONS_URL = "https://raw.githubusercontent.com/relic-se/Fruit_Jam_Store/refs/heads/main/database/applications.json"
 METADATA_URL = "https://raw.githubusercontent.com/{:s}/refs/heads/main/metadata.json"
 REPO_URL = "https://api.github.com/repos/{:s}"
 ICON_URL = "https://raw.githubusercontent.com/{:s}/{:s}/{:s}"
+RELEASE_URL = "https://api.github.com/repos/{:s}/releases/latest"
+
+# file operations
+
+def exists(path: str) -> bool:
+    try:
+        os.stat(path)
+    except:
+        return False
+    else:
+        return True
+    
+def mkdir(path: str, isfile: bool = False) -> bool:
+    parts = path.strip("/").split("/")
+    if isfile:
+        parts = parts[:-1]
+    for i in range(len(parts)):
+        dirpath = "/" + "/".join(parts[:i+1])
+        if not exists(dirpath):
+            os.mkdir(dirpath)
+
+def rmtree(dirpath: str) -> None:
+    for name in os.listdir(dirpath):
+        filepath = dirpath + "/" + name
+        st_mode = os.stat(filepath)[0]
+        if st_mode & 0x8000:
+            os.remove(filepath)
+        elif st_mode & 0x4000:
+            rmtree(filepath)
+    os.rmdir(dirpath)
+
+def extractall(zf: ZipFile, destination: str, source: str = "") -> None:
+    for srcpath in zf:
+        if srcpath.startswith(source + "/"):
+            destpath = destination + "/" + srcpath[len(source) + 1:]
+            mkdir(destpath, True)
+            with open(destpath, "wb") as f:
+                f.write(zf.read(zf[srcpath]))
+
+def is_app_installed(name: str) -> bool:
+    return exists("/sd/apps/{:s}".format(name))
+
+# file download + caching
+
+def _download_file(url: str, extension: str, name: str|None = None) -> str:
+    if not extension.startswith("."):
+        extension = "." + extension
+
+    if name is None:
+        name = url.split("/")[-1][:-len(extension)]
+    elif name.endswith(extension):
+        name = name[:-len(extension)]
+    path = "/sd/.cache/{:s}{:s}".format(name, extension)
+
+    # download file if it doesn't already exist
+    if not exists(path):
+        fj.network.wget(url, path)
+    # TODO: Cache duration
+    return path
+
+def download_image(url: str, name: str|None = None) -> str:
+    return _download_file(
+        url=url,
+        extension=".bmp",
+        name=name,
+    )
+
+def download_json(url: str, name: str|None = None) -> str:
+    path = _download_file(
+        url=url,
+        extension=".json",
+        name=name,
+    )
+    with open(path, "r") as f:
+        data = json.loads(f.read())
+    return data
+
+def download_zip(url: str, name: str|None = None) -> str:
+    return _download_file(
+        url=url,
+        extension=".zip",
+        name=name,
+    )
 
 # get Fruit Jam OS config if available
 try:
@@ -186,17 +271,9 @@ if not fj.sd_check():
     display.refresh()
     reset(3)
 
-# create apps directory on sd card if it doesn't exist
-try:
-    os.stat("/sd/apps")
-except OSError:
-    os.mkdir("/sd/apps")
-
-# create cache directory (used for saving images) if it doesn't already exist
-try:
-    os.stat("/sd/.cache")
-except OSError:
-    os.mkdir("/sd/.cache")
+# create necessary directories on sd card if they don't already exist
+for dirname in ("apps", ".cache"):
+    mkdir("/sd/" + dirname)
 
 # download applications database
 try:
@@ -373,62 +450,6 @@ dialog_yes = Button(
 )
 dialog_buttons.append(dialog_yes)
 
-# file download + caching
-
-def _download_file(url: str, extension: str, name: str|None = None) -> str:
-    if not extension.startswith("."):
-        extension = "." + extension
-
-    if name is None:
-        name = url.split("/")[-1][:-len(extension)]
-    elif name.endswith(extension):
-        name = name[:-len(extension)]
-    path = "/sd/.cache/{:s}{:s}".format(name, extension)
-
-    # check if file already exists
-    try:
-        os.stat(path)
-    except OSError:
-        # download file
-        fj.network.wget(url, path)
-    return path
-
-def download_image(url: str, name: str|None = None) -> str:
-    return _download_file(
-        url=url,
-        extension=".bmp",
-        name=name,
-    )
-
-def download_json(url: str, name: str|None = None) -> str:
-    path = _download_file(
-        url=url,
-        extension=".json",
-        name=name,
-    )
-    with open(path, "r") as f:
-        data = json.loads(f.read())
-    return data
-
-def is_installed(name: str) -> bool:
-    # check if application is installed
-    try:
-        os.stat("/sd/apps/{:s}".format(name))
-    except:
-        return False
-    else:
-        return True
-
-def rmtree(dirpath: str) -> None:
-    for name in os.listdir(dirpath):
-        filepath = dirpath + "/" + name
-        st_mode = os.stat(filepath)[0]
-        if st_mode & 0x8000:
-            os.remove(filepath)
-        elif st_mode & 0x4000:
-            rmtree(filepath)
-    os.rmdir(dirpath)
-
 # item navigation
 
 def select_category(name: str) -> None:
@@ -482,7 +503,7 @@ def show_page(page: int = 0) -> None:
         # set default details
         item_icon.bitmap = default_icon_bmp
         item_icon.pixel_shader = default_icon_palette
-        item_installed.hidden = not is_installed(repo_name)
+        item_installed.hidden = not is_app_installed(repo_name)
         item_title.text = title
         item_author.text = repo_owner
         item_description.text = "Loading..."
@@ -624,7 +645,7 @@ def toggle_application() -> None:
     
     dialog_yes.selected = True
 
-    if is_installed(repo_name):
+    if is_app_installed(repo_name):
         status_label.text = "Deleting {:s}...".format(path)
         display.refresh()
         try:
@@ -636,7 +657,61 @@ def toggle_application() -> None:
             status_label.text = "Successfully deleted application!"
             display.refresh()
     else:
-        print("Downloading")
+        status_label.text = "Reading release data from {:s}".format(selected_application)
+        display.refresh()
+
+        # get repository info
+        try:
+            release = download_json(
+                url=RELEASE_URL.format(selected_application),
+                name=selected_application.replace("/", "_") + "_release",
+            )
+        except (OSError, ValueError, HttpError) as e:
+            status_label.text = "Unable to read release data from {:s}! {:s}".format(selected_application, str(e))
+            display.refresh()
+        else:
+            # download project bundle
+            status_label.text = "Downloading release assets..."
+            asset = list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))[0]
+            try:
+                zip_path = download_zip(asset["browser_download_url"], repo_name)
+            except (OSError, ValueError, HttpError) as e:
+                status_label.text = "Failed to download release assets for {:s}! {:s}".format(selected_application, str(e))
+                display.refresh()
+            else:
+                status_label.text = "Installing application..."
+                display.refresh()
+
+                # read archived file
+                with open(zip_path, "rb") as f:
+                    zf = ZipFile(f)
+                    
+                    # determine correct inner path based on CP version
+                    major_version = int(os.uname().release.split(".")[0])
+                    version_name = "CircuitPython {:d}.x".format(major_version)
+                    for dirpath in (repo_name + "/" + version_name, version_name, repo_name, ""):
+                        try:
+                            zf[(dirpath + "/code.py").strip("/")]
+                        except KeyError:
+                            pass
+                        else:
+                            break
+                    
+                    # make sure we found code.py
+                    try:
+                        zf[(dirpath + "/code.py").strip("/")]
+                    except KeyError:
+                        status_label.text = "Could not locate application files within release!"
+                        display.refresh()
+                    else:
+                        # extract files
+                        extractall(zf, path, dirpath)
+
+                        status_label.text = "Successfully installed {:s}!".format(selected_application)
+                        display.refresh()
+                
+                # remove zip file
+                os.remove(zip_path)
 
     # hide dialog and update installed state
     deselect_application()
