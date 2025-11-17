@@ -523,10 +523,15 @@ def show_page(page: int = 0) -> None:
     # hide all items
     for index in range(PAGE_SIZE):
         item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS)).hidden = True
-    
+
     # update page label
     current_page = page
-    page_label.text = "{:d}/{:d}".format(page + 1, math.ceil(len(applications[selected_category]) / PAGE_SIZE))
+    total_pages = math.ceil(len(applications[selected_category]) / PAGE_SIZE)
+    page_label.text = "{:d}/{:d}".format(page + 1, total_pages)
+
+    # toggle arrows
+    left_arrow.hidden = not page
+    right_arrow.hidden = page + 1 == total_pages
 
     # display default details
     for index in range(start, end):
@@ -821,7 +826,7 @@ async def mouse_task() -> None:
 
             timeouts = 0
             previous_mouse_state = False
-            while timeouts < 60:
+            while timeouts < 99:
                 if mouse.update() is not None:
                     timeouts = 0
                     mouse_state = "left" in mouse.pressed_btns
@@ -829,9 +834,9 @@ async def mouse_task() -> None:
                         if dialog_buttons.hidden:
                             if (clicked_cell := item_grid.which_cell_contains((mouse.x * SCALE, mouse.y * SCALE))) is not None:
                                 select_application(clicked_cell[1] * PAGE_COLUMNS + clicked_cell[0])
-                            elif right_arrow.contains((mouse.x, mouse.y, 0)):
+                            elif not right_arrow.hidden and right_arrow.contains((mouse.x, mouse.y, 0)):
                                 next_page()
-                            elif left_arrow.contains((mouse.x, mouse.y, 0)):
+                            elif not left_arrow.hidden and left_arrow.contains((mouse.x, mouse.y, 0)):
                                 previous_page()
                             else:
                                 for button in category_group:
