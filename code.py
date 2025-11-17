@@ -168,6 +168,10 @@ right_bmp, right_palette = adafruit_imageload.load("bitmaps/arrow_right.bmp")
 right_palette.make_transparent(0)
 left_palette[2] = right_palette[2] = (config.palette_arrow if config is not None else 0x004abe)
 
+exit_bmp, exit_palette = adafruit_imageload.load("bitmaps/exit.bmp")
+exit_palette.make_transparent(0)
+exit_palette[1] = config.palette_fg if config is not None else 0xffffff
+
 # display constants
 SCALE = 2 if display.width > 360 else 1
 
@@ -397,6 +401,15 @@ right_arrow = AnchoredTileGrid(
 right_arrow.anchor_point = (1.0, 0.5)
 right_arrow.anchored_position = (DISPLAY_WIDTH, (DISPLAY_HEIGHT // 2) - 2)
 arrow_group.append(right_arrow)
+
+# setup exit icon
+exit_tg = AnchoredTileGrid(
+    bitmap=exit_bmp,
+    pixel_shader=exit_palette,
+)
+exit_tg.anchor_point = (0.5, 0.5)
+exit_tg.anchored_position = (TITLE_HEIGHT // 2, TITLE_HEIGHT // 2)
+arrow_group.append(exit_tg)
 
 # setup dialog
 dialog_group = displayio.Group()
@@ -838,6 +851,8 @@ async def mouse_task() -> None:
                                 next_page()
                             elif not left_arrow.hidden and left_arrow.contains((mouse.x, mouse.y, 0)):
                                 previous_page()
+                            elif exit_tg.contains((mouse.x, mouse.y, 0)):
+                                reset()
                             else:
                                 for button in category_group:
                                     if button.contains((mouse.x, mouse.y)):
