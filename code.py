@@ -529,7 +529,8 @@ def show_page(page: int = 0) -> None:
     # update page label
     current_page = page
     page_label.text = "{:d}/{:d}".format(page + 1, math.ceil(len(applications[selected_category]) / PAGE_SIZE))
-    
+
+    # display default details
     for index in range(start, end):
         item_group = item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS))
         item_icon, item_installed, item_title, item_author, item_description = item_group
@@ -551,9 +552,15 @@ def show_page(page: int = 0) -> None:
         item_author.text = repo_owner
         item_description.text = "Loading..."
         item_group.hidden = False
+    
+    # read external application data
+    for index in range(start, end):
+        item_group = item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS))
+        item_icon, item_installed, item_title, item_author, item_description = item_group
+
+        full_name = applications[selected_category][index]
 
         status_label.text = "Reading repository data from {:s}".format(full_name)
-        display.refresh()
 
         # get repository info
         try:
