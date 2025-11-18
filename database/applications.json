@@ -13,8 +13,7 @@
         "samblenny/fruit-jam-two-gamepad-demo",
         "samblenny/fruit-jam-usb-midi-tester"
     ],
-    "Other": [
-        "samblenny/fruit-jam-spirals",
-        "samblenny/fruit-jam-usb-midi-tester"
+    "Video": [
+        "samblenny/fruit-jam-spirals"
     ]
 }
