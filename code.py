@@ -837,6 +837,7 @@ async def mouse_task() -> None:
     global selected_category, selected_application
     while True:
         if (mouse := adafruit_usb_host_mouse.find_and_init_boot_mouse()) is not None:
+            mouse.scale = SCALE
             mouse.x = DISPLAY_WIDTH // 2
             mouse.y = DISPLAY_HEIGHT // 2
             mouse_group.append(mouse.tilegrid)
