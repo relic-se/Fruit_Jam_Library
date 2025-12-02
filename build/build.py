@@ -9,9 +9,9 @@ import os
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import zipfile
 
+import pygit2
 import requests
 from circup.commands import main as circup_cli
 
@@ -25,10 +25,6 @@ SRC_FILES = (
     "icon.bmp",
     "metadata.json"
 )
-
-def run(cmd):
-    result = subprocess.run(cmd, shell=True, check=True, capture_output=True)
-    return result.stdout.decode('utf-8').strip()
 
 def get_latest_repository_release_assets(name:str|dict) -> list:
     request_url = "https://api.github.com/repos/{}/releases/latest".format(name)
@@ -47,16 +43,15 @@ def replace_tags(file:Path, data:dict) -> None:
 def main():
 
     # get github repository details
-    git_remote = run("git config --get remote.origin.url")
+    git_repo = pygit2.Repository(pygit2.discover_repository(os.getcwd()))
+
+    git_remote = git_repo.remotes["origin"].url
     git_remote = re.sub(r'^git@github\.com:', "https://github.com/", git_remote)
     git_remote = re.sub(r'\.git$', "", git_remote)
 
     git_owner, git_name = re.findall(r'^https:\/\/github\.com\/([^\/]+)\/([^\/]+)$', git_remote)[0]
 
-    try:
-        git_commit = run('git rev-parse --short HEAD')
-    except subprocess.CalledProcessError:
-        git_commit = "NO_COMMIT"
+    git_commit = git_repo.revparse_single("HEAD^").id
 
     # get the project root directory
     build_dir = Path(__file__).parent

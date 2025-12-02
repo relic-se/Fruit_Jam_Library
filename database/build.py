@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import re
 
-from github import Auth, Github
+from github import Github
 from mdutils.mdutils import MdUtils
 
 DATABASE_FILE = "applications.json"
