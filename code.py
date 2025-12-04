@@ -233,6 +233,29 @@ class ActionButton(Button):
             self.selected = True
             self._action()
 
+class TileGridButton(Button):
+
+    def __init__(self, bitmap: displayio.Bitmap = None, pixel_shader: displayio.PixelShader = None, pixel_shader_index: int = 0, **kwargs):
+        super().__init__(**kwargs)
+        self._pixel_shader_index = pixel_shader_index
+        self._tilegrid = AnchoredTileGrid(
+            bitmap=bitmap,
+            pixel_shader=pixel_shader,
+        )
+        self._tilegrid.anchor_point = (0.5, 0.5)
+        self._tilegrid.anchored_position = (self.width // 2, self.height // 2)
+        self._tilegrid.pixel_shader[pixel_shader_index] = self.label_color
+        self.append(self._tilegrid)
+
+    @property
+    def selected(self) -> bool:
+        return self._selected
+    
+    @selected.setter
+    def selected(self, value: bool) -> None:
+        super().selected = value
+        self._tilegrid.pixel_shader[self._pixel_shader_index] = self.selected_label if value else self.label_color
+
 # create groups
 root_group = displayio.Group()
 display.root_group = root_group
@@ -424,13 +447,22 @@ right_arrow.anchored_position = (DISPLAY_WIDTH, (DISPLAY_HEIGHT // 2) - 2)
 arrow_group.append(right_arrow)
 
 # setup exit icon
-exit_tg = AnchoredTileGrid(
+exit_button = TileGridButton(
     bitmap=exit_bmp,
     pixel_shader=exit_palette,
+    pixel_shader_index=1,
+    x=0,
+    y=0,
+    width=TITLE_HEIGHT,
+    height=TITLE_HEIGHT,
+    fill_color=(config.palette_bg if config is not None else 0x222222),
+    label_color=(config.palette_fg if config is not None else 0xffffff),
+    outline_color=(config.palette_bg if config is not None else 0x222222),
+    selected_fill=(config.palette_fg if config is not None else 0xffffff),
+    selected_label=(config.palette_bg if config is not None else 0x222222),
+    selected_outline=(config.palette_fg if config is not None else 0xffffff),
 )
-exit_tg.anchor_point = (0.5, 0.5)
-exit_tg.anchored_position = (TITLE_HEIGHT // 2, TITLE_HEIGHT // 2)
-arrow_group.append(exit_tg)
+arrow_group.append(exit_button)
 
 # setup dialog
 dialog_group = displayio.Group()
@@ -864,7 +896,7 @@ async def mouse_task() -> None:
                                 next_page()
                             elif not left_arrow.hidden and left_arrow.contains((mouse.x, mouse.y, 0)):
                                 previous_page()
-                            elif exit_tg.contains((mouse.x, mouse.y, 0)):
+                            elif exit_button.contains((mouse.x, mouse.y)):
                                 reset()
                             else:
                                 for button in category_group:
