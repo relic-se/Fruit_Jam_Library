@@ -1,5 +1,5 @@
 # Fruit Jam Library
-Browse and install community CircuitPython applications on the Adafruit Fruit Jam.
+Browse and install community CircuitPython applications on the Adafruit Fruit Jam. See the [applications database](database/README.md) for more details on all of the community applications available within the library.
 
 ![screenshot of application on the Adafruit Fruit Jam using a custom color palette](assets/screenshot.jpg)
 
