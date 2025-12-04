@@ -219,6 +219,7 @@ BUTTON_PROPS = {
     "outline_color": (config.palette_fg if config is not None else 0xffffff),
     "selected_fill": (config.palette_fg if config is not None else 0xffffff),
     "selected_label": (config.palette_bg if config is not None else 0x222222),
+    "selected_outline": (config.palette_fg if config is not None else 0xffffff),
 }
 
 # create groups
