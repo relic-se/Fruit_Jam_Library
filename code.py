@@ -713,9 +713,14 @@ def download_application(full_name: str = None) -> bool:
     
     # download project bundle
     log("Downloading release assets...")
-    asset = list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))[0]
+    download_url = release["zipball_url"] if "zipball_url" in release else ""
+    if "assets" in release:
+        download_url = list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))[0]["browser_download_url"]
+    if not download_url:
+        log("Unable to locate release assets for {:s}!", full_name)
+        return False
     try:
-        zip_path = download_zip(asset["browser_download_url"], repo_name)
+        zip_path = download_zip(download_url, repo_name)
     except (OSError, ValueError, HttpError) as e:
         log("Failed to download release assets for {:s}! {:s}".format(full_name, str(e)))
         return False
