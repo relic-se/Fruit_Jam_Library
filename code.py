@@ -106,6 +106,7 @@ def _download_file(url: str, extension: str, name: str|None = None) -> str:
 
     # download file if it doesn't already exist
     if not exists(path):
+        fj.network.connect()  # ensure we're connected to wifi
         fj.network.wget(url, path)
     # TODO: Cache duration
     return path
