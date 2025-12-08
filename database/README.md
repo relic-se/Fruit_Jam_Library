@@ -8,6 +8,16 @@ Interested in contributing your Fruit Jam application? Read the [documention](./
 
 ## Games
 
+### ![CPZ Machine icon](https://raw.githubusercontent.com/ZContent/CPZ_Machine/main/icon.bmp) CPZ Machine
+
+A native Z Machine for the Adafruit Fruit Jam running Circuit Python for playing Zork and similar games
+
+![screen shot](https://raw.githubusercontent.com/ZContent/CPZ_Machine/main/https://raw.githubusercontent.com/ZContent/CPZ_Machine/refs/heads/main/cpz_screenshot.jpg)
+
+- Latest Release: [Download](https://github.com/ZContent/CPZ_Machine/releases/latest)
+- Code Repository: [ZContent/CPZ_Machine](https://github.com/ZContent/CPZ_Machine)
+- Author: [ZContent](https://github.com/ZContent)
+
 ### ![Fruitris🍌 icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Fruitris/main/icon.bmp) Fruitris🍌
 
 Tetris, Fruit Jamified!

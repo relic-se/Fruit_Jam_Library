@@ -129,7 +129,7 @@ def main():
 
             details["Latest Release"] = "[Download]({:s}/releases/latest)".format(repo.html_url)
             details["Code Repository"] = "[{:s}]({:s})".format(repo.full_name, repo.html_url)
-            details["Author"] = "[{:s}]({:s})".format(repo.owner.name, repo.owner.html_url)
+            details["Author"] = "[{:s}]({:s})".format(repo.owner.name if repo.owner.name is not None else repo.owner.login, repo.owner.html_url)
 
             details = list(map(lambda key: "{:s}: {:s}".format(key, details[key]), details))
             md.new_list(details)
