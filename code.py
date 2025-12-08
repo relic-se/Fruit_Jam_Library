@@ -715,8 +715,8 @@ def download_application(full_name: str = None) -> bool:
     # download project bundle
     log("Downloading release assets...")
     download_url = release["zipball_url"] if "zipball_url" in release else ""
-    if "assets" in release:
-        download_url = list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))[0]["browser_download_url"]
+    if "assets" in release and len(assets := list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))):
+        download_url = assets[0]["browser_download_url"]
     if not download_url:
         log("Unable to locate release assets for {:s}!", full_name)
         return False
