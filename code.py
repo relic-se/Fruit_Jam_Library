@@ -738,10 +738,14 @@ def download_application(full_name: str = None) -> bool:
         with ZipFile(zip_path, "r") as zf:
             
             # determine correct inner path based on CP version
-            namelist = zf.namelist()
             for dirpath in (repo_name + "/" + VERSION_NAME, VERSION_NAME, repo_name, repo_name + "-" + release["tag_name"] if "tag_name" in release else "", "", None):
-                if dirpath is not None and (dirpath + "/code.py").strip("/") in namelist:
-                    break
+                if dirpath is not None:
+                    try:
+                        zf.getinfo((dirpath + "/code.py").strip("/"))
+                    except KeyError:
+                        pass
+                    else:
+                        break
             
             # make sure we found code.py
             if dirpath is None:
@@ -751,7 +755,7 @@ def download_application(full_name: str = None) -> bool:
                 extractall(zf, path, dirpath)
                 log("Successfully installed {:s}!".format(full_name))
                 result = True
-                
+
     except BadZipFile as e:
         log("Unable to extract and install application! {:s}".format(str(e)))
         
