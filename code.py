@@ -46,11 +46,15 @@ except ImportError:
     pass
 
 # program constants
+
 APPLICATIONS_URL = "https://raw.githubusercontent.com/relic-se/Fruit_Jam_Library/refs/heads/main/database/applications.json"
 METADATA_URL = "https://raw.githubusercontent.com/{:s}/refs/heads/main/metadata.json"
 REPO_URL = "https://api.github.com/repos/{:s}"
 ICON_URL = "https://raw.githubusercontent.com/{:s}/{:s}/{:s}"
 RELEASE_URL = "https://api.github.com/repos/{:s}/releases/latest"
+
+MAJOR_VERSION = int(os.uname().release.split(".")[0])
+VERSION_NAME = "CircuitPython {:d}.x".format(MAJOR_VERSION)
 
 # file operations
 
@@ -82,12 +86,13 @@ def rmtree(dirpath: str) -> None:
     os.rmdir(dirpath)
 
 def extractall(zf: ZipFile, destination: str, source: str = "") -> None:
-    for srcpath in zf:
-        if srcpath.startswith(source + "/"):
-            destpath = destination + "/" + srcpath[len(source) + 1:]
+    for srcinfo in zf.infolist():
+        if srcinfo.filename.startswith(source + "/"):
+            destpath = destination + "/" + srcinfo.filename[len(source) + 1:]
             mkdir(destpath, True)
-            with open(destpath, "wb") as f:
-                f.write(zf.read(zf[srcpath]))
+            with open(destpath, "wb") as destfile:
+                with zf.open(srcinfo.filename) as srcfile:
+                    destfile.write(srcfile.read())
 
 def is_app_installed(name: str) -> bool:
     return exists("/sd/apps/{:s}".format(name))
@@ -730,30 +735,23 @@ def download_application(full_name: str = None) -> bool:
     log("Installing application...")
     result = False
     try:
-        with open(zip_path, "rb") as f:
-            zf = ZipFile(f)
+        with ZipFile(zip_path, "r") as zf:
             
             # determine correct inner path based on CP version
-            major_version = int(os.uname().release.split(".")[0])
-            version_name = "CircuitPython {:d}.x".format(major_version)
-            for dirpath in (repo_name + "/" + version_name, version_name, repo_name, ""):
-                try:
-                    zf[(dirpath + "/code.py").strip("/")]
-                except KeyError:
-                    pass
-                else:
+            namelist = zf.namelist()
+            for dirpath in (repo_name + "/" + VERSION_NAME, VERSION_NAME, repo_name, repo_name + "-" + release["tag_name"] if "tag_name" in release else "", "", None):
+                if dirpath is not None and (dirpath + "/code.py").strip("/") in namelist:
                     break
             
             # make sure we found code.py
-            try:
-                zf[(dirpath + "/code.py").strip("/")]
-            except KeyError:
+            if dirpath is None:
                 log("Could not locate application files within release!")
             else:
                 # extract files
                 extractall(zf, path, dirpath)
                 log("Successfully installed {:s}!".format(full_name))
                 result = True
+                
     except BadZipFile as e:
         log("Unable to extract and install application! {:s}".format(str(e)))
         
