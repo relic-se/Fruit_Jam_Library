@@ -87,7 +87,7 @@ def rmtree(dirpath: str) -> None:
 
 def extractall(zf: ZipFile, destination: str, source: str = "") -> None:
     for srcinfo in zf.infolist():
-        if srcinfo.filename.startswith(source + "/"):
+        if not srcinfo.filename.endswith("/") and srcinfo.filename.startswith(source + "/"):
             destpath = destination + "/" + srcinfo.filename[len(source) + 1:]
             mkdir(destpath, True)
             with open(destpath, "wb") as destfile:
