@@ -127,7 +127,7 @@ OS_PATH_SEP = OS_SEP
 try:
     import zlib # We may need its compression method
     crc32 = zlib.crc32
-except ImportError:
+except (ImportError, AttributeError):
     zlib = None
     crc32 = binascii.crc32
 
