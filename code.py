@@ -38,7 +38,7 @@ import adafruit_imageload
 from adafruit_portalbase.network import HttpError
 import adafruit_usb_host_mouse
 
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
 
 try:
     import typing
@@ -106,6 +106,7 @@ def _download_file(url: str, extension: str, name: str|None = None) -> str:
 
     # download file if it doesn't already exist
     if not exists(path):
+        fj.network.connect()  # ensure we're connected to wifi
         fj.network.wget(url, path)
     # TODO: Cache duration
     return path
@@ -714,8 +715,8 @@ def download_application(full_name: str = None) -> bool:
     # download project bundle
     log("Downloading release assets...")
     download_url = release["zipball_url"] if "zipball_url" in release else ""
-    if "assets" in release:
-        download_url = list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))[0]["browser_download_url"]
+    if "assets" in release and len(assets := list(filter(lambda x: x["name"].endswith(".zip"), release["assets"]))):
+        download_url = assets[0]["browser_download_url"]
     if not download_url:
         log("Unable to locate release assets for {:s}!", full_name)
         return False
@@ -728,31 +729,35 @@ def download_application(full_name: str = None) -> bool:
     # read archived file
     log("Installing application...")
     result = False
-    with open(zip_path, "rb") as f:
-        zf = ZipFile(f)
-        
-        # determine correct inner path based on CP version
-        major_version = int(os.uname().release.split(".")[0])
-        version_name = "CircuitPython {:d}.x".format(major_version)
-        for dirpath in (repo_name + "/" + version_name, version_name, repo_name, ""):
+    try:
+        with open(zip_path, "rb") as f:
+            zf = ZipFile(f)
+            
+            # determine correct inner path based on CP version
+            major_version = int(os.uname().release.split(".")[0])
+            version_name = "CircuitPython {:d}.x".format(major_version)
+            for dirpath in (repo_name + "/" + version_name, version_name, repo_name, ""):
+                try:
+                    zf[(dirpath + "/code.py").strip("/")]
+                except KeyError:
+                    pass
+                else:
+                    break
+            
+            # make sure we found code.py
             try:
                 zf[(dirpath + "/code.py").strip("/")]
             except KeyError:
-                pass
+                log("Could not locate application files within release!")
             else:
-                break
+                # extract files
+                extractall(zf, path, dirpath)
+                log("Successfully installed {:s}!".format(full_name))
+                result = True
+    except BadZipFile as e:
+        log("Unable to extract and install application! {:s}".format(str(e)))
+        return False
         
-        # make sure we found code.py
-        try:
-            zf[(dirpath + "/code.py").strip("/")]
-        except KeyError:
-            log("Could not locate application files within release!")
-        else:
-            # extract files
-            extractall(zf, path, dirpath)
-            log("Successfully installed {:s}!".format(full_name))
-            result = True
-    
     # remove zip file
     os.remove(zip_path)
     return result
