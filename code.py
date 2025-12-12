@@ -154,7 +154,7 @@ fg_palette = displayio.Palette(1)
 fg_palette[0] = config.palette_fg if config is not None else 0xffffff
 
 # setup display
-displayio.release_displays()
+#displayio.release_displays()
 try:
     adafruit_fruitjam.peripherals.request_display_config()  # user display configuration
 except ValueError:  # invalid user config or no user config provided
@@ -891,6 +891,71 @@ def toggle_application(full_name: str = None) -> bool:
 
     return result
 
+# item selection
+
+selected_item = None
+
+def set_selected_item_color(value: bool, item: tuple|AnchoredTileGrid|None = None) -> None:
+    if item is None:
+        item = selected_item
+    if item is not None:
+        if isinstance(item, tuple):
+            item_grid.get_content(item)[2].background_color = (config.palette_accent if config is not None else 0x008800) if value else None
+        elif isinstance(item, AnchoredTileGrid):
+            item.pixel_shader[2] = (config.palette_accent if config is not None else 0x008800) if value else original_arrow_btn_color
+
+def select_item(value: tuple|AnchoredTileGrid|None) -> None:
+    global selected_item
+    set_selected_item_color(False)  # reset selected state on previous item
+    selected_item = value  # assign selected
+    set_selected_item_color(True)  # set selected state on current item
+
+def change_selected_item(dx: int, dy: int) -> bool:
+    if (dx == 0 and dy == 0) or (dx != 0 and dy != 0) or abs(dx) > 1 or abs(dy) > 1:  # only change 1 axis by 1
+        return
+
+    if dialog_buttons.hidden:
+        # TODO: up/down from arrows
+
+        # previous value
+        value = selected_item
+        if value is left_arrow:
+            value = (-1, 0)
+        elif value is right_arrow:
+            value = (PAGE_COLUMNS, 0)
+        elif value is None:
+            # initial value
+            value = (
+                ((PAGE_COLUMNS + 1) * (dx < 0) - 1) if dx != 0 else 0,
+                ((PAGE_ROWS + 1) * (dy < 0) - 1) if dy != 0 else 0
+            )
+        
+        while True:
+            # apply delta
+            value = (
+                ((value[0] + dx + 1) % (PAGE_COLUMNS + 2)) - 1, # allow -1 and PAGE_COLUMNS
+                (value[1] + dy) % PAGE_ROWS
+            )
+
+            # check visibility
+            if value[0] < 0:
+                if not left_arrow.hidden:
+                    value = left_arrow
+                    break
+            elif value[0] >= PAGE_COLUMNS:
+                if not right_arrow.hidden:
+                    value = right_arrow
+                    break
+            elif not item_grid.get_content(value).hidden:
+                break
+
+        select_item(value)
+
+    else:
+        pass  # TODO
+
+select_item((0, 0))  # initial selection
+
 # mouse control
 mouse = None
 if config is not None and config.use_mouse and (mouse := adafruit_usb_host_mouse.find_and_init_boot_mouse()) is not None:
@@ -912,15 +977,54 @@ while supervisor.runtime.serial_bytes_available:
     sys.stdin.read(1)
 
 # control loop
+def str_unshift(value: str, data: str = "", count: int = 1) -> tuple:
+    if len(value) < count:
+        return None, value
+    return data + value[:count], value[count:]
+
+def key_unshift(buffer: str) -> tuple:
+    key, buffer = str_unshift(buffer)
+    if key is None:
+        return None, buffer
+    if key == "\x1b" and buffer and buffer[0] == "[":
+        key, buffer = str_unshift(buffer, key, 2)
+    return key, buffer
+
 try:
     previous_mouse_state = False
     while True:
 
         # keyboard input
         if (available := supervisor.runtime.serial_bytes_available) > 0:
-            key = sys.stdin.read(available)
-            if key == "\x1b":  # escape
-                reset()
+            buffer = sys.stdin.read(available)
+            while True:
+                key, buffer = key_unshift(buffer)
+                if key is None:
+                    break
+
+                if key == "\x1b":  # escape
+                    reset()
+                elif key == "\x1b[A":  # up
+                    change_selected_item(0, -1)
+                elif key == "\x1b[B":  # down
+                    change_selected_item(0, 1)
+                elif key == "\x1b[C":  # right
+                    change_selected_item(1, 0)
+                elif key == "\x1b[D":  # left
+                    change_selected_item(-1, 0)
+                elif key == "\n":  # enter
+                    if dialog_buttons.hidden:
+                        if selected_item is right_arrow:
+                            next_page()
+                        elif selected_item is left_arrow:
+                            previous_page()
+                        elif isinstance(selected_item, tuple):
+                            select_application(selected_item)
+                    else:
+                        pass  # TODO
+                elif key in "1234567890":
+                    # TODO: categories
+                    pass
 
         # mouse input
         if mouse is not None and mouse.update() is not None:
