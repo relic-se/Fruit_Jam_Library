@@ -194,6 +194,8 @@ TITLE_HEIGHT = 16
 STATUS_HEIGHT = 16
 STATUS_PADDING = 4
 
+HELP_MARGIN = 1
+
 MENU_HEIGHT = 24
 MENU_GAP = 8
 
@@ -313,6 +315,16 @@ page_label = Label(
     anchored_position=(display.width - STATUS_PADDING, display.height - STATUS_HEIGHT // 2)
 )
 status_group.append(page_label)
+
+# add keyboard navigation help
+help_label = Label(
+    font=FONT,
+    text="[Arrow]: Move [Enter]: Select [1-9]: Category",
+    color=(config.palette_fg if config is not None else 0xffffff),
+    anchor_point=(0, 1.0),
+    anchored_position=(STATUS_PADDING, display.height - STATUS_HEIGHT - HELP_MARGIN)
+)
+root_group.append(help_label)
 
 def log(msg: str) -> None:
     status_label.text = msg
