@@ -792,7 +792,7 @@ def download_application(full_name: str = None) -> bool:
                 log("Successfully installed {:s}!".format(full_name))
                 result = True
 
-    except BadZipFile as e:
+    except (BadZipFile, OSError, MemoryError) as e:
         log("Unable to extract and install application! {:s}".format(str(e)))
         
     # remove zip file
