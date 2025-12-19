@@ -69,7 +69,7 @@ Now, if you view your repository on GitHub, it should show your new branch and t
 
 ## 7. Create your pull request
 
-In order to merge your changes with the main repository so that your application is visible to all users, you will need to create a pull request from your branch into `relic-se/Fruit_Jam_Application` which will then undergo review before being accepted into the library.
+In order to merge your changes with the main repository so that your application is visible to all users, you will need to create a pull request from your branch into [relic-se/Fruit_Jam_Library](https://github.com/relic-se/Fruit_Jam_Application) which will then undergo review before being accepted into the library.
 
 You can follow [this guide](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request) to learn how to use GitHub's interfaces to create the pull request.
 
