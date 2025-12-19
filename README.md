@@ -17,3 +17,7 @@ python build/build.py
 ```
 
 The project bundle should be found within `./dist` as a `.zip` file with the same name as your repository.
+
+## Contributing
+
+Interested in adding your Fruit Jam application to the library database? You can do so by following [this guide](database/CONTRIBUTING.md).
