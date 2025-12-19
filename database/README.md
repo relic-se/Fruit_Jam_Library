@@ -50,6 +50,14 @@ Speed dating sim for snakes written in CircuitPython for the Fruit Jam
 - Code Repository: [relic-se/Fruit_Jam_Ssspeed_Dating](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
+### ![Pyboom! icon](https://raw.githubusercontent.com/Flobio75/Pyboom/main/bomb_icon.bmp) Pyboom!
+
+CircuitPython bomb dropping and bucket catching game for the Adafruit Fruit Jam.
+
+- Latest Release: [Download](https://github.com/Flobio75/Pyboom/releases/latest)
+- Code Repository: [Flobio75/Pyboom](https://github.com/Flobio75/Pyboom)
+- Author: [Flobio75](https://github.com/Flobio75)
+
 ## Music
 
 ### Fruit Jam Portable MIDI Synth

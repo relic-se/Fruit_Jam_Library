@@ -3,7 +3,8 @@
         "ZContent/CPZ_Machine",
         "relic-se/Fruit_Jam_Fruitris",
         "relic-se/Fruit_Jam_Pong",
-        "relic-se/Fruit_Jam_Ssspeed_Dating"
+        "relic-se/Fruit_Jam_Ssspeed_Dating",
+        "Flobio75/Pyboom"
     ],
     "Music": [
         "samblenny/fruit-jam-portable-midi-synth"
