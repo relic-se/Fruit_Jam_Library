@@ -59,7 +59,15 @@ def main():
 
             # read repository readme (for title and screenshot)
             print("Reading README.md")
-            readme_contents = repo.get_readme().decoded_content.decode("utf-8")
+            try:
+                readme_contents = repo.get_readme().decoded_content.decode("utf-8")
+            except Exception as e:
+                if hasattr(e, "message") and e.message:
+                    print(e.message)
+                else:
+                    print(e)
+            else:
+                readme_contents = ""
             title = re.search(r'^# (.*)$', readme_contents, re.MULTILINE)
             title = title.group(1) if title is not None else repo.name
             icon = None
@@ -73,7 +81,7 @@ def main():
                     if "icon" in metadata:
                         icon = metadata["icon"]
             except Exception as e:
-                if hasattr(e, "message"):
+                if hasattr(e, "message") and e.message:
                     print(e.message)
                 else:
                     print(e)
@@ -120,7 +128,7 @@ def main():
                     if "guide_url" in metadata:
                         details["Playground Guide"] = "[{:s}]({:s})".format(metadata["guide_url"], metadata["guide_url"])
             except Exception as e:
-                if hasattr(e, "message"):
+                if hasattr(e, "message") and e.message:
                     print(e.message)
                 else:
                     print(e)
