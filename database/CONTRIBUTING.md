@@ -43,7 +43,7 @@ In order to run the build script, you will need to have [Python 3](https://www.p
 
 ``` bash
 cd Fruit_Jam_Library
-pip3 -r database/requirements.txt
+pip3 install -r database/requirements.txt
 python3 database/build.py
 ```
 
