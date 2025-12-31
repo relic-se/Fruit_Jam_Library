@@ -380,7 +380,7 @@ except (OSError, ValueError, AttributeError) as e:
     log("Unable to fetch applications database! {:s}".format(str(e)))
     reset(3)
 
-categories = list(applications.keys())
+categories = sorted(applications.keys())
 selected_category = None
 
 # setup menu
