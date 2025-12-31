@@ -2,28 +2,83 @@
 # SPDX-FileCopyrightText: Copyright 2025 Cooper Dalrymple (@relic-se)
 #
 # SPDX-License-Identifier: MIT
+import argparse
 import json
 import os
 from pathlib import Path
 import re
 
-from github import Github
+from github import Github, Repository, ContentFile
 from mdutils.mdutils import MdUtils
 
 DATABASE_FILE = "applications.json"
 MARKDOWN_FILE = "README.md"
 
-def main():
+def main(reset: bool = False):
     db_dir = Path(__file__).parent
+
+    # setup cache
+    cache_dir = db_dir / ".cache"
+    if reset and os.path.exists(cache_dir):
+        os.rmdir(cache_dir)
+    cache_dir.mkdir(exist_ok=True)
+
+    def read_file(repo: Repository, filename: str, allow_empty: bool = True) -> str|object|list:
+        print(f"Reading {filename}: ", end="")
+
+        repo_dir = cache_dir / repo.full_name
+        repo_dir.mkdir(parents=True, exist_ok=True)
+
+        path = repo_dir / filename
+        is_json = filename.endswith(".json")
+
+        if os.path.exists(path):
+            try:
+                with open(path, "r") as f:
+                    if is_json:
+                        contents = json.load(f)
+                    else:
+                        contents = f.read()
+            except Exception as e:
+                os.remove(path)
+            else:
+                print("Using cached result.")
+                return contents
+
+        try:
+            if (contents := (repo.get_readme() if filename == "README.md" else repo.get_contents(filename))):
+                contents = contents.decoded_content.decode("utf-8")
+            if is_json and isinstance(contents, str):
+                contents = json.loads(contents)
+        except Exception as e:
+            print(e)
+            contents = {} if is_json else ""
+        else:
+            print("Success!")
+        finally:
+            if allow_empty or contents:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with open(path, "w") as f:
+                    if is_json:
+                        json.dump(contents, f)
+                    else:
+                        f.write(contents)
+        return contents
 
     # delete readme
     if os.path.isfile(db_dir / MARKDOWN_FILE):
         os.remove(db_dir / MARKDOWN_FILE)
 
     # read applications database
-    print("Reading database")
-    with open(db_dir / DATABASE_FILE, "r") as f:
-        database = json.load(f)
+    print("Reading database... ", end="")
+    try:
+        with open(db_dir / DATABASE_FILE, "r") as f:
+            database = json.load(f)
+    except Exception as e:
+        print(e)
+        return
+    else:
+        print("Success!")
 
     # connect with GitHub API
     print("Connecting with GitHub Web API")
@@ -42,7 +97,7 @@ def main():
     for category in database.keys():
         repositories = database[category]
 
-        print("Generating category: {:s}".format(category))
+        print(f"Generating category: {category}")
         md.new_header(
             level=2,
             title=category,
@@ -50,43 +105,37 @@ def main():
 
         for repo_slug in repositories:
             # get repository
-            print("Reading repository: {:s}".format(repo_slug))
-            repo = gh.get_repo(repo_slug)
+            print(f"Reading repository - {repo_slug}: ", end="")
+            try:
+                repo = gh.get_repo(repo_slug)
+            except Exception as e:
+                if hasattr(e, "message") and e.message:
+                    print(e.message)
+                else:
+                    print(e)
+                print("Skipping repository")
+                continue
+            else:
+                print("Success!")
             raw_url = "https://raw.githubusercontent.com/{:s}/main".format(
                 repo.full_name,
                 repo.default_branch
             )
 
             # read repository readme (for title and screenshot)
-            print("Reading README.md")
-            try:
-                readme_contents = repo.get_readme().decoded_content.decode("utf-8")
-            except Exception as e:
-                if hasattr(e, "message") and e.message:
-                    print(e.message)
-                else:
-                    print(e)
-            else:
-                readme_contents = ""
+            readme_contents = read_file(repo, "README.md")
             title = re.search(r'^# (.*)$', readme_contents, re.MULTILINE)
             title = title.group(1) if title is not None else repo.name
-            icon = None
 
             # read Fruit Jam OS metadata
-            print("Reading metadata.json: ", end="")
-            try:
-                if metadata_file := repo.get_contents("metadata.json"):
-                    metadata = json.loads(metadata_file.decoded_content.decode("utf-8"))
-                    title = metadata["title"]
-                    if "icon" in metadata:
-                        icon = metadata["icon"]
-            except Exception as e:
-                if hasattr(e, "message") and e.message:
-                    print(e.message)
-                else:
-                    print(e)
-            else:
-                print("Success!")
+            metadata = read_file(repo, "metadata.json")
+            if "title" in metadata:
+                title = metadata["title"]
+            icon = metadata["icon"] if "icon" in metadata else None
+
+            # read build metadata
+            build_metadata = read_file(repo, "build/metadata.json")
+            guide_url = build_metadata["guide_url"] if "guide_url" in build_metadata else None
             
             # add application title
             md.new_header(
@@ -117,29 +166,15 @@ def main():
 
             # create details table
             details = {}
-
             if repo.homepage:
                 details["Website"] = repo.homepage
-            
-            print("Reading build/metadata.json: ", end="")
-            try:
-                if metadata_file := repo.get_contents("build/metadata.json"):
-                    metadata = json.loads(metadata_file.decoded_content.decode("utf-8"))
-                    if "guide_url" in metadata:
-                        details["Playground Guide"] = "[{:s}]({:s})".format(metadata["guide_url"], metadata["guide_url"])
-            except Exception as e:
-                if hasattr(e, "message") and e.message:
-                    print(e.message)
-                else:
-                    print(e)
-            else:
-                print("Success!")
-
-            details["Latest Release"] = "[Download]({:s}/releases/latest)".format(repo.html_url)
-            details["Code Repository"] = "[{:s}]({:s})".format(repo.full_name, repo.html_url)
+            if guide_url is not None:
+                details["Playground Guide"] = f"[{guide_url}]({guide_url})"
+            details["Latest Release"] = f"[Download]({repo.html_url}/releases/latest)"
+            details["Code Repository"] = f"[{repo.full_name}]({repo.html_url})"
             details["Author"] = "[{:s}]({:s})".format(repo.owner.name if repo.owner.name is not None else repo.owner.login, repo.owner.html_url)
 
-            details = list(map(lambda key: "{:s}: {:s}".format(key, details[key]), details))
+            details = list(map(lambda key: f"{key}: {details[key]}", details))
             md.new_list(details)
     
     # save file
@@ -153,4 +188,8 @@ def main():
     print("{:s} generation completed!".format(MARKDOWN_FILE))
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--reset', action='store_true')
+    args = parser.parse_args()
+
+    main(reset=args.reset)

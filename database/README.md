@@ -50,6 +50,15 @@ Speed dating sim for snakes written in CircuitPython for the Fruit Jam
 - Code Repository: [relic-se/Fruit_Jam_Ssspeed_Dating](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
+### ![Moon Miner icon](https://raw.githubusercontent.com/ZContent/MoonMiner/main/icon.bmp) Moon Miner
+
+Moon miner is a game where your mission is to land and pick up minerals from various moons.
+
+- Website: https://danthegeek.com/moon-miner/
+- Latest Release: [Download](https://github.com/ZContent/MoonMiner/releases/latest)
+- Code Repository: [ZContent/MoonMiner](https://github.com/ZContent/MoonMiner)
+- Author: [ZContent](https://github.com/ZContent)
+
 ### ![Pyboom! icon](https://raw.githubusercontent.com/Flobio75/Pyboom/main/bomb_icon.bmp) Pyboom!
 
 CircuitPython bomb dropping and bucket catching game for the Adafruit Fruit Jam.
@@ -69,6 +78,19 @@ Portable MIDI synth project for Fruit Jam
 - Latest Release: [Download](https://github.com/samblenny/fruit-jam-portable-midi-synth/releases/latest)
 - Code Repository: [samblenny/fruit-jam-portable-midi-synth](https://github.com/samblenny/fruit-jam-portable-midi-synth)
 - Author: [Sam Blenny](https://github.com/samblenny)
+
+## Screensavers
+
+### ![Mystify icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Screensaver_Mystify/main/icon.bmp) Mystify
+
+Variation of "Mystify Your Mind" screensaver for Fruit Jam OS
+
+![Screenshot of Mystify screensaver](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Screensaver_Mystify/main/assets/screenshot.jpg)
+
+- Playground Guide: [https://adafruit-playground.com](https://adafruit-playground.com)
+- Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_Screensaver_Mystify/releases/latest)
+- Code Repository: [relic-se/Fruit_Jam_Screensaver_Mystify](https://github.com/relic-se/Fruit_Jam_Screensaver_Mystify)
+- Author: [Cooper Dalrymple](https://github.com/relic-se)
 
 ## Utilities
 
