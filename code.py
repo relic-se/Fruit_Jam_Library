@@ -244,7 +244,7 @@ ARROW_MARGIN = 2
 
 GRID_MARGIN = 8 * SCALE
 GRID_WIDTH = display.width - GRID_MARGIN * 2 - (ARROW_MARGIN + left_bmp.width) * SCALE * 2
-GRID_HEIGHT = display.height - TITLE_HEIGHT * SCALE - MENU_HEIGHT * SCALE - GRID_MARGIN * 2 - STATUS_HEIGHT
+GRID_HEIGHT = display.height - TITLE_HEIGHT * SCALE - MENU_HEIGHT - GRID_MARGIN * 2 - STATUS_HEIGHT
 
 ITEM_WIDTH = GRID_WIDTH // PAGE_COLUMNS
 ITEM_HEIGHT = GRID_HEIGHT // PAGE_ROWS
@@ -384,13 +384,13 @@ categories = sorted(applications.keys())
 selected_category = None
 
 # setup menu
-category_group = displayio.Group(scale=SCALE)
+category_group = displayio.Group()
 root_group.append(category_group)
-MENU_WIDTH = (DISPLAY_WIDTH - MENU_GAP * (len(categories) + 1)) // len(categories)
+MENU_WIDTH = (display.width - MENU_GAP * (len(categories) + 1)) // len(categories)
 for index, category in enumerate(categories):
     category_button = Button(
         x=(MENU_WIDTH + MENU_GAP) * index + MENU_GAP,
-        y=TITLE_HEIGHT,
+        y=TITLE_HEIGHT * SCALE,
         width=MENU_WIDTH,
         label=category,
         **BUTTON_PROPS,
@@ -400,7 +400,7 @@ for index, category in enumerate(categories):
 # setup items
 item_grid = GridLayout(
     x=(display.width - GRID_WIDTH) // 2,
-    y=TITLE_HEIGHT * SCALE + MENU_HEIGHT * SCALE + GRID_MARGIN,
+    y=TITLE_HEIGHT * SCALE + MENU_HEIGHT + GRID_MARGIN,
     width=GRID_WIDTH,
     height=GRID_HEIGHT,
     grid_size=(PAGE_COLUMNS, PAGE_ROWS),
@@ -1116,7 +1116,7 @@ try:
                         reset()
                     else:
                         for button in category_group:
-                            if button.contains((mouse.x, mouse.y)):
+                            if button.contains((mouse.x * SCALE, mouse.y * SCALE)):
                                 select_category(button.label)
                                 break
                 else:
