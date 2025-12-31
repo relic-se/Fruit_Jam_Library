@@ -33,34 +33,36 @@ def main(reset: bool = False):
         is_json = filename.endswith(".json")
 
         if os.path.exists(path):
-            with open(path, "r") as f:
-                if is_json:
-                    contents = json.load(f)
-                else:
-                    contents = f.read()
-            print("Using cached result.")
-        else:
             try:
-                if (contents := (repo.get_readme() if filename == "README.md" else repo.get_contents(filename))):
-                    contents = contents.decoded_content.decode("utf-8")
-                if is_json and isinstance(contents, str):
-                    contents = json.loads(contents)
+                with open(path, "r") as f:
+                    if is_json:
+                        contents = json.load(f)
+                    else:
+                        contents = f.read()
             except Exception as e:
-                if hasattr(e, "message") and e.message:
-                    print(e.message)
-                else:
-                    print(e)
-                contents = {} if is_json else ""
+                os.remove(path)
             else:
-                print("Success!")
-            finally:
-                if allow_empty or contents:
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    with open(path, "w") as f:
-                        if is_json:
-                            json.dump(contents, f)
-                        else:
-                            f.write(contents)
+                print("Using cached result.")
+                return contents
+
+        try:
+            if (contents := (repo.get_readme() if filename == "README.md" else repo.get_contents(filename))):
+                contents = contents.decoded_content.decode("utf-8")
+            if is_json and isinstance(contents, str):
+                contents = json.loads(contents)
+        except Exception as e:
+            print(e)
+            contents = {} if is_json else ""
+        else:
+            print("Success!")
+        finally:
+            if allow_empty or contents:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with open(path, "w") as f:
+                    if is_json:
+                        json.dump(contents, f)
+                    else:
+                        f.write(contents)
         return contents
 
     # delete readme
@@ -68,9 +70,15 @@ def main(reset: bool = False):
         os.remove(db_dir / MARKDOWN_FILE)
 
     # read applications database
-    print("Reading database")
-    with open(db_dir / DATABASE_FILE, "r") as f:
-        database = json.load(f)
+    print("Reading database... ", end="")
+    try:
+        with open(db_dir / DATABASE_FILE, "r") as f:
+            database = json.load(f)
+    except Exception as e:
+        print(e)
+        return
+    else:
+        print("Success!")
 
     # connect with GitHub API
     print("Connecting with GitHub Web API")
