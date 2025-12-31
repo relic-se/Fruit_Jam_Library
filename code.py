@@ -47,6 +47,12 @@ except ImportError:
 
 # program constants
 
+APPLICATIONS_DIR = "apps"
+SCREENSAVERS_DIR = "screensavers"
+CACHE_DIR = ".cache"
+
+SCREENSAVERS_CATEGORY = "Screensavers"
+
 APPLICATIONS_URL = "https://raw.githubusercontent.com/relic-se/Fruit_Jam_Library/refs/heads/main/database/applications.json"
 METADATA_URL = "https://raw.githubusercontent.com/{:s}/refs/heads/main/metadata.json"
 REPO_URL = "https://api.github.com/repos/{:s}"
@@ -56,6 +62,20 @@ BRANCH_DOWNLOAD_URL = "https://github.com/{:s}/archive/refs/heads/{:s}.zip"
 
 MAJOR_VERSION = int(os.uname().release.split(".")[0])
 VERSION_NAME = "CircuitPython {:d}.x".format(MAJOR_VERSION)
+
+# prepare system
+
+fj = adafruit_fruitjam.FruitJam()  # setup peripherals and networking
+
+def reset(timeout:int = 0) -> None:
+    if timeout > 0:
+        time.sleep(timeout)
+    fj.peripherals.deinit()
+    supervisor.reload()
+
+SD_INSTALLED = fj.sd_check()
+if not SD_INSTALLED:
+    print("SD card not mounted. Using internal flash storage.")
 
 # file operations
 
@@ -95,8 +115,28 @@ def extractall(zf: ZipFile, destination: str, source: str = "") -> None:
                 with zf.open(srcinfo.filename) as srcfile:
                     destfile.write(srcfile.read())
 
-def is_app_installed(name: str) -> bool:
-    return exists("/sd/apps/{:s}".format(name))
+def get_path(path: str|list) -> str:
+    return "/" + "/".join(filter(lambda x: x, ["sd" if SD_INSTALLED else ""] + (path.split("/") if isinstance(path, str) else path)))
+
+def get_application_directory(category: str = None) -> str:
+    if category is None:
+        category = selected_category
+    return SCREENSAVERS_DIR if category == SCREENSAVERS_CATEGORY else APPLICATIONS_DIR
+
+def get_application_path(name: str, category: str = None) -> str:
+    return get_path([get_application_directory(category), name])
+
+def get_application_file(name: str, category: str = None) -> str:
+    if category is None:
+        category = selected_category
+    return get_application_path(name, category) if category != SCREENSAVERS_CATEGORY else None
+
+def is_application_installed(name: str, category: str = None) -> bool:
+    return exists(get_application_path(name, category))
+
+# create necessary directories on sd card if they don't already exist
+for dirname in (APPLICATIONS_DIR, SCREENSAVERS_DIR, CACHE_DIR):
+    mkdir(get_path(dirname))
 
 # file download + caching
 
@@ -108,7 +148,7 @@ def _download_file(url: str, extension: str, name: str|None = None) -> str:
         name = url.split("/")[-1][:-len(extension)]
     elif name.endswith(extension):
         name = name[:-len(extension)]
-    path = "/sd/.cache/{:s}{:s}".format(name, extension)
+    path = get_path([CACHE_DIR, name + extension])
 
     # download file if it doesn't already exist
     if not exists(path):
@@ -155,15 +195,11 @@ fg_palette = displayio.Palette(1)
 fg_palette[0] = config.palette_fg if config is not None else 0xffffff
 
 # setup display
-#displayio.release_displays()
 try:
     adafruit_fruitjam.peripherals.request_display_config()  # user display configuration
 except ValueError:  # invalid user config or no user config provided
     adafruit_fruitjam.peripherals.request_display_config(720, 400)  # default display size
 display = supervisor.runtime.display
-
-# setup FruitJam peripherals and networking
-fj = adafruit_fruitjam.FruitJam()
 
 # load images
 default_icon_bmp, default_icon_palette = adafruit_imageload.load("bitmaps/default_icon.bmp")
@@ -330,21 +366,6 @@ root_group.append(help_label)
 def log(msg: str) -> None:
     status_label.text = msg
     print(msg)
-
-# check that sd card is mounted
-def reset(timeout:int = 0) -> None:
-    if timeout > 0:
-        time.sleep(timeout)
-    fj.peripherals.deinit()
-    supervisor.reload()
-
-if not fj.sd_check():
-    log("SD card not mounted! SD card installation required for this application.")
-    reset(3)
-
-# create necessary directories on sd card if they don't already exist
-for dirname in ("apps", ".cache"):
-    mkdir("/sd/" + dirname)
 
 # download applications database
 try:
@@ -627,7 +648,7 @@ def show_page(page: int = 0) -> None:
         # set default details
         item_icon.bitmap = default_icon_bmp
         item_icon.pixel_shader = default_icon_palette
-        item_installed.hidden = not is_app_installed(repo_name)
+        item_installed.hidden = not is_application_installed(repo_name)
         item_title.text = title
         item_author.text = repo_owner
         item_description.text = "Loading..."
@@ -715,9 +736,14 @@ def download_application(full_name: str = None) -> bool:
             return False
         full_name = selected_application
     repo_owner, repo_name = full_name.split("/")
-    path = "/sd/apps/{:s}".format(repo_name)
+
+    path = get_application_path(repo_name)
+    is_screensaver = selected_category == SCREENSAVERS_CATEGORY
+    application_type = "screensaver" if is_screensaver else "application"
+    module_filename = "__init__.py" if is_screensaver else "code.py"
     
-    if is_app_installed(repo_name):
+    if is_application_installed(repo_name):
+        log("Selected {:s}, {:s}, is already installed!".format(application_type, repo_name))
         return False
 
     # get repository release info
@@ -761,7 +787,7 @@ def download_application(full_name: str = None) -> bool:
         return False
     
     # read archived file
-    log("Installing application...")
+    log("Installing {:s}...".format(application_type))
     result = False
     try:
         with ZipFile(zip_path, "r") as zf:
@@ -770,22 +796,22 @@ def download_application(full_name: str = None) -> bool:
             for dirpath in (repo_name + "/" + VERSION_NAME, VERSION_NAME, repo_name, "", None):
                 if dirpath is not None:
                     try:
-                        zf.getinfo((dirpath + "/code.py").strip("/"))
+                        zf.getinfo((dirpath + "/" + module_filename).strip("/"))
                     except KeyError:
                         pass
                     else:
                         break
 
             if dirpath is None:
-                # try searching for code.py
+                # try searching for module
                 for info in zf.infolist():
-                    if info.filename.split("/")[-1] == "code.py":
-                        dirpath = info.filename[:-len("code.py")].strip("/")
+                    if info.filename.split("/")[-1] == module_filename:
+                        dirpath = info.filename[:-len(module_filename)].strip("/")
                         break
             
-            # make sure we found code.py
+            # make sure we found module
             if dirpath is None:
-                log("Could not locate application files within release!")
+                log("Could not locate {:s} files within release!".format(application_type))
             else:
                 # extract files
                 extractall(zf, path, dirpath)
@@ -793,7 +819,7 @@ def download_application(full_name: str = None) -> bool:
                 result = True
 
     except (BadZipFile, OSError, MemoryError) as e:
-        log("Unable to extract and install application! {:s}".format(str(e)))
+        log("Unable to extract and install {:s}! {:s}".format(application_type, str(e)))
         
     # remove zip file
     os.remove(zip_path)
@@ -806,9 +832,11 @@ def remove_application(full_name: str = None) -> bool:
             return False
         full_name = selected_application
     repo_owner, repo_name = full_name.split("/")
-    path = "/sd/apps/{:s}".format(repo_name)
+
+    path = get_application_path(repo_name)
+    application_type = "screensaver" if selected_category == SCREENSAVERS_CATEGORY else "application"
     
-    if not is_app_installed(repo_name):
+    if not is_application_installed(repo_name):
         return False
 
     log("Deleting {:s}...".format(path))
@@ -818,7 +846,7 @@ def remove_application(full_name: str = None) -> bool:
         log("Failed to delete {:s}: {:s}".format(path, str(e)))
         return False
     else:
-        log("Successfully deleted application!")
+        log("Successfully deleted {:s}!".format(application_type))
         return True
 
 def open_application(full_name: str = None) -> None:
@@ -828,17 +856,19 @@ def open_application(full_name: str = None) -> None:
             return False
         full_name = selected_application
     repo_owner, repo_name = selected_application.split("/")
-    launch_file = "/sd/apps/{:s}/code.py".format(repo_name)
-
-    if is_app_installed(repo_name) and exists(launch_file):
+    
+    filepath = get_application_file(repo_name)
+    if filepath is not None and is_application_installed(repo_name) and exists(filepath):
         log("Opening {:s}...".format(repo_name))
         supervisor.set_next_code_file(
-            launch_file,
+            filepath,
             sticky_on_reload=False,
             reload_on_error=True,
-            working_directory="/".join(launch_file.split("/")[:-1])
+            working_directory="/".join(filepath.split("/")[:-1])
         )
         supervisor.reload()
+    else:
+        log("Unable to open {:s}!".format(repo_name))
 
 selected_application = None
 def select_application(index: int|tuple) -> None:
@@ -853,6 +883,9 @@ def select_application(index: int|tuple) -> None:
     
     selected_application = applications[selected_category][index]
     repo_owner, repo_name = selected_application.split("/")
+
+    is_screensaver = selected_category == SCREENSAVERS_CATEGORY
+    application_type = "screensaver" if is_screensaver else "application"
     
     # hide other UI elements
     category_group.hidden = True
@@ -864,12 +897,13 @@ def select_application(index: int|tuple) -> None:
     item_group = item_grid.get_content((page_index % PAGE_COLUMNS, page_index // PAGE_COLUMNS))
     item_icon, item_installed, item_title, item_author, item_description = item_group
 
+    path = get_application_path(repo_name)
     if item_installed.hidden:
         show_dialog(
-            content="Would you like to download and install \"{:s}\" by {:s} to your SD card at /sd/apps/{:s}?".format(
+            content="Would you like to download and install \"{:s}\" by {:s} to your SD card at {:s}?".format(
                 item_title.text,
                 item_author.text,
-                repo_name
+                path
             ),
             actions=[
                 ("Cancel", deselect_application),
@@ -878,15 +912,16 @@ def select_application(index: int|tuple) -> None:
         )
     else:
         show_dialog(
-            content="The application, \"{:s}\", is already installed. Would you like to remove it from your SD card at /sd/apps/{:s}? Any save data within /saves will be retained.".format(
+            content="The {:s}, \"{:s}\", is already installed. Would you like to remove it from your SD card at {:s}? Any save data within /saves will be retained.".format(
+                application_type,
                 item_title.text,
-                repo_name
+                path
             ),
-            actions=[
+            actions=list(filter(lambda x: x, [
                 ("Cancel", deselect_application),
                 ("Remove", toggle_application),
-                ("Open", open_application),
-            ],
+                ("Open", open_application) if not is_screensaver else None,
+            ])),
         )
 
     dialog_group.hidden = False
@@ -909,7 +944,7 @@ def toggle_application(full_name: str = None) -> bool:
         full_name = selected_application
     repo_owner, repo_name = selected_application.split("/")
 
-    if not is_app_installed(repo_name):
+    if not is_application_installed(repo_name):
         result = download_application(full_name)
     else:
         result = remove_application(full_name)
