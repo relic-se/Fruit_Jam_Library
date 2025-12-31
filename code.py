@@ -642,8 +642,12 @@ def show_page(page: int = 0) -> None:
         # format title from repository name
         title = repo_name.replace("-", " ").replace("_", " ").strip()
         title = " ".join(map(lambda word: word[0].upper() + word[1:].lower(), title.split(" ")))
-        if title.startswith("Fruit Jam"):
-            title = title[len("Fruit Jam"):].strip()
+        if title.startswith("Fruit Jam "):
+            title = title[len("Fruit Jam "):].strip()
+        if selected_category == SCREENSAVERS_CATEGORY and title.startswith("Screensaver "):
+            title = title[len("Screensaver "):].strip()
+        elif title.startswith("Application "):
+            title = title[len("Application "):].strip()
         
         # set default details
         item_icon.bitmap = default_icon_bmp
