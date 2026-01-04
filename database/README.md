@@ -38,6 +38,16 @@ Moon miner is a game where your mission is to land and pick up minerals from var
 - Code Repository: [ZContent/MoonMiner](https://github.com/ZContent/MoonMiner)
 - Author: [ZContent](https://github.com/ZContent)
 
+### ![🕹️ Pac-Jam icon](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/images/icon.bmp) 🕹️ Pac-Jam
+
+A Pac-man clone written in CircuitPython for the Adafruit Fruit Jam
+
+![Pac-Man on Fruit Jam](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/images/pac-fruitjam.png)
+
+- Latest Release: [Download](https://github.com/RetiredWizard/pac-fruitjam/releases/latest)
+- Code Repository: [RetiredWizard/pac-fruitjam](https://github.com/RetiredWizard/pac-fruitjam)
+- Author: [RetiredWizard](https://github.com/RetiredWizard)
+
 ### ![Pyboom! icon](https://raw.githubusercontent.com/Flobio75/Pyboom/main/bomb_icon.bmp) Pyboom!
 
 CircuitPython bomb dropping and bucket catching game for the Adafruit Fruit Jam.
