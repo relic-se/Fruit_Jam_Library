@@ -2,10 +2,11 @@
     "Games": [
         "ZContent/CPZ_Machine",
         "relic-se/Fruit_Jam_Fruitris",
-        "relic-se/Fruit_Jam_Pong",
-        "relic-se/Fruit_Jam_Ssspeed_Dating",
         "ZContent/MoonMiner",
-        "Flobio75/Pyboom"
+        "RetiredWizard/pac-fruitjam",
+        "Flobio75/Pyboom",
+        "relic-se/Fruit_Jam_Pong",
+        "relic-se/Fruit_Jam_Ssspeed_Dating"
     ],
     "Music": [
         "samblenny/fruit-jam-portable-midi-synth"

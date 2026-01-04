@@ -29,6 +29,33 @@ Tetris, Fruit Jamified!
 - Code Repository: [relic-se/Fruit_Jam_Fruitris](https://github.com/relic-se/Fruit_Jam_Fruitris)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
+### ![Moon Miner icon](https://raw.githubusercontent.com/ZContent/MoonMiner/main/icon.bmp) Moon Miner
+
+Moon miner is a game where your mission is to land and pick up minerals from various moons.
+
+- Website: https://danthegeek.com/moon-miner/
+- Latest Release: [Download](https://github.com/ZContent/MoonMiner/releases/latest)
+- Code Repository: [ZContent/MoonMiner](https://github.com/ZContent/MoonMiner)
+- Author: [ZContent](https://github.com/ZContent)
+
+### ![🕹️ Pac-Jam icon](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/images/icon.bmp) 🕹️ Pac-Jam
+
+A Pac-man clone written in CircuitPython for the Adafruit Fruit Jam
+
+![Pac-Man on Fruit Jam](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/images/pac-fruitjam.png)
+
+- Latest Release: [Download](https://github.com/RetiredWizard/pac-fruitjam/releases/latest)
+- Code Repository: [RetiredWizard/pac-fruitjam](https://github.com/RetiredWizard/pac-fruitjam)
+- Author: [RetiredWizard](https://github.com/RetiredWizard)
+
+### ![Pyboom! icon](https://raw.githubusercontent.com/Flobio75/Pyboom/main/bomb_icon.bmp) Pyboom!
+
+CircuitPython bomb dropping and bucket catching game for the Adafruit Fruit Jam.
+
+- Latest Release: [Download](https://github.com/Flobio75/Pyboom/releases/latest)
+- Code Repository: [Flobio75/Pyboom](https://github.com/Flobio75/Pyboom)
+- Author: [Flobio75](https://github.com/Flobio75)
+
 ### ![Pyng icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Pong/main/icon.bmp) Pyng
 
 Tutorial code for how to make a simple pong game for the Adafruit Fruit Jam in CircuitPython
@@ -49,23 +76,6 @@ Speed dating sim for snakes written in CircuitPython for the Fruit Jam
 - Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating/releases/latest)
 - Code Repository: [relic-se/Fruit_Jam_Ssspeed_Dating](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
-
-### ![Moon Miner icon](https://raw.githubusercontent.com/ZContent/MoonMiner/main/icon.bmp) Moon Miner
-
-Moon miner is a game where your mission is to land and pick up minerals from various moons.
-
-- Website: https://danthegeek.com/moon-miner/
-- Latest Release: [Download](https://github.com/ZContent/MoonMiner/releases/latest)
-- Code Repository: [ZContent/MoonMiner](https://github.com/ZContent/MoonMiner)
-- Author: [ZContent](https://github.com/ZContent)
-
-### ![Pyboom! icon](https://raw.githubusercontent.com/Flobio75/Pyboom/main/bomb_icon.bmp) Pyboom!
-
-CircuitPython bomb dropping and bucket catching game for the Adafruit Fruit Jam.
-
-- Latest Release: [Download](https://github.com/Flobio75/Pyboom/releases/latest)
-- Code Repository: [Flobio75/Pyboom](https://github.com/Flobio75/Pyboom)
-- Author: [Flobio75](https://github.com/Flobio75)
 
 ## Music
 
