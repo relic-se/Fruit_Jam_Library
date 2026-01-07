@@ -6,6 +6,28 @@
 
 Interested in contributing your Fruit Jam application? Read the [documention](./CONTRIBUTING.md) to learn more.
 
+## Audio
+
+### ![MorseCPO icon](https://raw.githubusercontent.com/samblenny/fruit-jam-code-practice-oscillator/main/icon_64.bmp) MorseCPO
+
+Morse code practice oscillator for Fruit Jam with 3d-printable mx straight key
+
+![code-practice-oscillator-1.jpeg](https://raw.githubusercontent.com/samblenny/fruit-jam-code-practice-oscillator/main/code-practice-oscillator-1.jpeg)
+
+- Latest Release: [Download](https://github.com/samblenny/fruit-jam-code-practice-oscillator/releases/latest)
+- Code Repository: [samblenny/fruit-jam-code-practice-oscillator](https://github.com/samblenny/fruit-jam-code-practice-oscillator)
+- Author: [Sam Blenny](https://github.com/samblenny)
+
+### Fruit Jam Portable MIDI Synth
+
+Portable MIDI synth project for Fruit Jam
+
+![photo of portable MIDI synth setup](https://raw.githubusercontent.com/samblenny/fruit-jam-portable-midi-synth/main/fruit-jam-portable-midi-synth.jpeg)
+
+- Latest Release: [Download](https://github.com/samblenny/fruit-jam-portable-midi-synth/releases/latest)
+- Code Repository: [samblenny/fruit-jam-portable-midi-synth](https://github.com/samblenny/fruit-jam-portable-midi-synth)
+- Author: [Sam Blenny](https://github.com/samblenny)
+
 ## Games
 
 ### ![CPZ Machine icon](https://raw.githubusercontent.com/ZContent/CPZ_Machine/main/icon.bmp) CPZ Machine
@@ -76,18 +98,6 @@ Speed dating sim for snakes written in CircuitPython for the Fruit Jam
 - Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating/releases/latest)
 - Code Repository: [relic-se/Fruit_Jam_Ssspeed_Dating](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
-
-## Music
-
-### Fruit Jam Portable MIDI Synth
-
-Portable MIDI synth project for Fruit Jam
-
-![photo of portable MIDI synth setup](https://raw.githubusercontent.com/samblenny/fruit-jam-portable-midi-synth/main/fruit-jam-portable-midi-synth.jpeg)
-
-- Latest Release: [Download](https://github.com/samblenny/fruit-jam-portable-midi-synth/releases/latest)
-- Code Repository: [samblenny/fruit-jam-portable-midi-synth](https://github.com/samblenny/fruit-jam-portable-midi-synth)
-- Author: [Sam Blenny](https://github.com/samblenny)
 
 ## Screensavers
 
