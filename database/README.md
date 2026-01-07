@@ -8,6 +8,16 @@ Interested in contributing your Fruit Jam application? Read the [documention](./
 
 ## Audio
 
+### ![MorseCPO icon](https://raw.githubusercontent.com/samblenny/fruit-jam-code-practice-oscillator/main/icon_64.bmp) MorseCPO
+
+Morse code practice oscillator for Fruit Jam with 3d-printable mx straight key
+
+![code-practice-oscillator-1.jpeg](https://raw.githubusercontent.com/samblenny/fruit-jam-code-practice-oscillator/main/code-practice-oscillator-1.jpeg)
+
+- Latest Release: [Download](https://github.com/samblenny/fruit-jam-code-practice-oscillator/releases/latest)
+- Code Repository: [samblenny/fruit-jam-code-practice-oscillator](https://github.com/samblenny/fruit-jam-code-practice-oscillator)
+- Author: [Sam Blenny](https://github.com/samblenny)
+
 ### Fruit Jam Portable MIDI Synth
 
 Portable MIDI synth project for Fruit Jam
