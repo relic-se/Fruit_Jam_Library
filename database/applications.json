@@ -1,4 +1,7 @@
 {
+    "Audio": [
+        "samblenny/fruit-jam-portable-midi-synth"
+    ],
     "Games": [
         "ZContent/CPZ_Machine",
         "relic-se/Fruit_Jam_Fruitris",
@@ -7,9 +10,6 @@
         "Flobio75/Pyboom",
         "relic-se/Fruit_Jam_Pong",
         "relic-se/Fruit_Jam_Ssspeed_Dating"
-    ],
-    "Music": [
-        "samblenny/fruit-jam-portable-midi-synth"
     ],
     "Screensavers": [
         "relic-se/Fruit_Jam_Screensaver_Mystify"
