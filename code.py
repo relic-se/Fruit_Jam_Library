@@ -53,6 +53,7 @@ CACHE_DIR = ".cache"
 
 SCREENSAVERS_CATEGORY = "Screensavers"
 
+APPLICATIONS_PATH = "applications.json"  # used for testing
 APPLICATIONS_URL = "https://raw.githubusercontent.com/relic-se/Fruit_Jam_Library/refs/heads/main/database/applications.json"
 METADATA_URL = "https://raw.githubusercontent.com/{:s}/refs/heads/main/metadata.json"
 REPO_URL = "https://api.github.com/repos/{:s}"
@@ -367,18 +368,25 @@ def log(msg: str) -> None:
     status_label.text = msg
     print(msg)
 
-# download applications database
+# use local or download applications database
 try:
-    applications = json.loads(fj.fetch(
-        APPLICATIONS_URL,
-        force_content_type=adafruit_fruitjam.network.CONTENT_JSON,
-        timeout=10,
-    ))
-    if type(applications) is int:
-        raise ValueError("{:d} response".format(applications))
+    with open(APPLICATIONS_PATH, "r") as f:
+        applications = json.load(f)
+        if not isinstance(applications, dict):
+            raise ValueError("Invalid format")
 except (OSError, ValueError, AttributeError) as e:
-    log("Unable to fetch applications database! {:s}".format(str(e)))
-    reset(3)
+    log("Unable to read local applications database. {:s}".format(str(e)))
+    try:
+        applications = json.loads(fj.fetch(
+            APPLICATIONS_URL,
+            force_content_type=adafruit_fruitjam.network.CONTENT_JSON,
+            timeout=10,
+        ))
+        if type(applications) is int:
+            raise ValueError("{:d} response".format(applications))
+    except (OSError, ValueError, AttributeError) as e:
+        log("Unable to fetch applications database! {:s}".format(str(e)))
+        reset(3)
 
 categories = sorted(applications.keys())
 selected_category = None
