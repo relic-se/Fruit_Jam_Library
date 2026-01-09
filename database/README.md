@@ -99,6 +99,17 @@ Speed dating sim for snakes written in CircuitPython for the Fruit Jam
 - Code Repository: [relic-se/Fruit_Jam_Ssspeed_Dating](https://github.com/relic-se/Fruit_Jam_Ssspeed_Dating)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
+### ![ThumbyColor icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_ThumbyColor/main/icon.bmp) ThumbyColor
+
+Play Thumby Color games on the Adafruit Fruit Jam using this API translation layer
+
+![Screenshot of the game picker of the Thumby Color application on the Adafruit Fruit Jam](https://raw.githubusercontent.com/relic-se/Fruit_Jam_ThumbyColor/main/assets/screenshot.jpg)
+
+- Playground Guide: [https://adafruit-playground.com](https://adafruit-playground.com)
+- Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_ThumbyColor/releases/latest)
+- Code Repository: [relic-se/Fruit_Jam_ThumbyColor](https://github.com/relic-se/Fruit_Jam_ThumbyColor)
+- Author: [Cooper Dalrymple](https://github.com/relic-se)
+
 ## Screensavers
 
 ### ![Mystify icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Screensaver_Mystify/main/icon.bmp) Mystify
