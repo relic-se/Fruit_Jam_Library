@@ -641,7 +641,7 @@ def show_page(page: int = 0) -> None:
 
     # display default details
     for index in range(start, end):
-        item_group = item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS))
+        item_group = item_grid.get_content((index % PAGE_COLUMNS, (index // PAGE_COLUMNS) % PAGE_ROWS))
         item_icon, item_installed, item_title, item_author, item_description = item_group
 
         full_name = applications[selected_category][index]
@@ -668,7 +668,7 @@ def show_page(page: int = 0) -> None:
     
     # read external application data
     for index in range(start, end):
-        item_group = item_grid.get_content((index % PAGE_COLUMNS, index // PAGE_COLUMNS))
+        item_group = item_grid.get_content((index % PAGE_COLUMNS, (index // PAGE_COLUMNS) % PAGE_ROWS))
         item_icon, item_installed, item_title, item_author, item_description = item_group
 
         full_name = applications[selected_category][index]
@@ -905,8 +905,7 @@ def select_application(index: int|tuple) -> None:
     arrow_group.hidden = True
     
     # populate dialog info
-    page_index = index % PAGE_SIZE
-    item_group = item_grid.get_content((page_index % PAGE_COLUMNS, page_index // PAGE_COLUMNS))
+    item_group = item_grid.get_content((index % PAGE_COLUMNS, (index // PAGE_COLUMNS) % PAGE_ROWS))
     item_icon, item_installed, item_title, item_author, item_description = item_group
 
     path = get_application_path(repo_name)
