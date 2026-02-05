@@ -60,7 +60,7 @@ Moon miner is a game where your mission is to land and pick up minerals from var
 - Code Repository: [ZContent/MoonMiner](https://github.com/ZContent/MoonMiner)
 - Author: [ZContent](https://github.com/ZContent)
 
-### ![🕹️ Pac-Jam icon](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/images/icon.bmp) 🕹️ Pac-Jam
+### ![🕹️ Pac-Jam icon](https://raw.githubusercontent.com/RetiredWizard/pac-fruitjam/main/icon.bmp) 🕹️ Pac-Jam
 
 A Pac-man clone written in CircuitPython for the Adafruit Fruit Jam
 
@@ -122,6 +122,15 @@ Variation of "Mystify Your Mind" screensaver for Fruit Jam OS
 - Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_Screensaver_Mystify/releases/latest)
 - Code Repository: [relic-se/Fruit_Jam_Screensaver_Mystify](https://github.com/relic-se/Fruit_Jam_Screensaver_Mystify)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
+
+### The Fruit Jam Screensaver Bundle
+
+A bundle of Screensavers for use with the Fruit Jam OS
+
+- Website: https://danthegeek.com
+- Latest Release: [Download](https://github.com/ZContent/Fruit_Jam_SS_Bundle/releases/latest)
+- Code Repository: [ZContent/Fruit_Jam_SS_Bundle](https://github.com/ZContent/Fruit_Jam_SS_Bundle)
+- Author: [ZContent](https://github.com/ZContent)
 
 ## Utilities
 
