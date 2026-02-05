@@ -820,6 +820,16 @@ def download_application(full_name: str = None) -> bool:
                     if info.filename.split("/")[-1] == module_filename:
                         dirpath = info.filename[:-len(module_filename)].strip("/")
                         break
+
+            if dirpath is None:
+                # try finding top-level directory with .py files
+                min_parts = -1
+                for info in zf.infolist():
+                    if info.filename.endswith(".py"):
+                        parts = info.filename.split("/")[:-1]
+                        if min_parts < 0 or min_parts > len(parts):
+                            min_parts = len(parts)
+                            dirpath = "/".join(parts).strip("/")
             
             # make sure we found module
             if dirpath is None:
