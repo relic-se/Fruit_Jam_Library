@@ -950,6 +950,7 @@ def select_application(index: int|tuple) -> None:
             actions=list(filter(lambda x: x, [
                 ("Cancel", deselect_application),
                 ("Remove", toggle_application),
+                ("Update", update_application),
                 ("Open", open_application) if not is_screensaver else None,
             ])),
         )
@@ -978,6 +979,27 @@ def toggle_application(full_name: str = None) -> bool:
         result = download_application(full_name)
     else:
         result = remove_application(full_name)
+
+    # hide dialog and update installed state
+    deselect_application()
+    refresh_page()
+
+    return result
+
+def update_application(full_name: str = None) -> bool:
+    global selected_application, current_page
+    if full_name is None:
+        if selected_application is None:
+            return False
+        full_name = selected_application
+    repo_owner, repo_name = selected_application.split("/")
+
+    result = False
+    if is_application_installed(repo_name):
+        if remove_application(full_name):
+            result = download_application(full_name)
+    else:
+        log("Unable to locate application")
 
     # hide dialog and update installed state
     deselect_application()
