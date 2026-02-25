@@ -141,7 +141,7 @@ for dirname in (APPLICATIONS_DIR, SCREENSAVERS_DIR, CACHE_DIR):
 
 # file download + caching
 
-def _download_file(url: str, extension: str, name: str|None = None) -> str:
+def _download_file(url: str, extension: str, name: str|None = None, cache: bool = True) -> str:
     if not extension.startswith("."):
         extension = "." + extension
 
@@ -151,35 +151,42 @@ def _download_file(url: str, extension: str, name: str|None = None) -> str:
         name = name[:-len(extension)]
     path = get_path([CACHE_DIR, name + extension])
 
+    # remove file from cache if it exists and we're refreshing
+    if not cache and exists(path):
+        os.remove(path)
+
     # download file if it doesn't already exist
-    if not exists(path):
+    if not cache or not exists(path):
         fj.network.connect()  # ensure we're connected to wifi
         fj.network.wget(url, path)
     # TODO: Cache duration
     return path
 
-def download_image(url: str, name: str|None = None) -> str:
+def download_image(url: str, name: str|None = None, cache: bool = True) -> str:
     return _download_file(
         url=url,
         extension=".bmp",
         name=name,
+        cache=cache,
     )
 
-def download_json(url: str, name: str|None = None) -> str:
+def download_json(url: str, name: str|None = None, cache: bool = True) -> str:
     path = _download_file(
         url=url,
         extension=".json",
         name=name,
+        cache=cache,
     )
     with open(path, "r") as f:
         data = json.loads(f.read())
     return data
 
-def download_zip(url: str, name: str|None = None) -> str:
+def download_zip(url: str, name: str|None = None, cache: bool = True) -> str:
     return _download_file(
         url=url,
         extension=".zip",
         name=name,
+        cache=cache,
     )
 
 # get Fruit Jam OS config if available
@@ -764,6 +771,7 @@ def download_application(full_name: str = None) -> bool:
         release = download_json(
             url=RELEASE_URL.format(full_name),
             name=full_name.replace("/", "_") + "_release",
+            cache=False,
         )
     except (OSError, ValueError, HttpError) as e:
         log("Unable to read release data from {:s}! {:s}".format(full_name, str(e)))
@@ -774,6 +782,7 @@ def download_application(full_name: str = None) -> bool:
             repository = download_json(
                 url=REPO_URL.format(full_name),
                 name=full_name.replace("/", "_"),
+                cache=False,
             )
         except (OSError, ValueError, HttpError) as e:
             log("Unable to read repository data from {:s}! {:s}".format(full_name, str(e)))
@@ -793,7 +802,7 @@ def download_application(full_name: str = None) -> bool:
     # download project bundle
     log("Downloading release assets...")
     try:
-        zip_path = download_zip(download_url, repo_name)
+        zip_path = download_zip(download_url, repo_name, cache=False)
     except (OSError, ValueError, HttpError) as e:
         log("Failed to download release assets for {:s}! {:s}".format(full_name, str(e)))
         return False
