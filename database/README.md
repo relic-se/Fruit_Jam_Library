@@ -88,6 +88,16 @@ Tutorial code for how to make a simple pong game for the Adafruit Fruit Jam in C
 - Code Repository: [relic-se/Fruit_Jam_Pong](https://github.com/relic-se/Fruit_Jam_Pong)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
+### ![Raycasting icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Raycast/main/icon.bmp) Raycasting
+
+Demo of 3d raycasting for the Adafruit Fruit Jam 
+
+![Screenshot of Raycasting Demo](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Raycast/main/assets/blinka.png)
+
+- Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_Raycast/releases/latest)
+- Code Repository: [relic-se/Fruit_Jam_Raycast](https://github.com/relic-se/Fruit_Jam_Raycast)
+- Author: [Cooper Dalrymple](https://github.com/relic-se)
+
 ### ![Ssspeed Dating icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Ssspeed_Dating/main/icon.bmp) Ssspeed Dating
 
 Speed dating sim for snakes written in CircuitPython for the Fruit Jam
