@@ -25,6 +25,7 @@
         "samblenny/fruit-jam-usb-midi-tester"
     ],
     "Video": [
-        "samblenny/fruit-jam-spirals"
+        "samblenny/fruit-jam-spirals",
+        "relic-se/Fruit_Jam_VideoLooper"
     ]
 }
