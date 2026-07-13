@@ -90,7 +90,7 @@ Tutorial code for how to make a simple pong game for the Adafruit Fruit Jam in C
 
 ### ![Raycasting icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Raycast/main/icon.bmp) Raycasting
 
-Demo of 3d raycasting for the Adafruit Fruit Jam 
+Demo of 3d raycasting for the Adafruit Fruit Jam
 
 ![Screenshot of Raycasting Demo](https://raw.githubusercontent.com/relic-se/Fruit_Jam_Raycast/main/assets/blinka.png)
 
@@ -133,7 +133,7 @@ Variation of "Mystify Your Mind" screensaver for Fruit Jam OS
 - Code Repository: [relic-se/Fruit_Jam_Screensaver_Mystify](https://github.com/relic-se/Fruit_Jam_Screensaver_Mystify)
 - Author: [Cooper Dalrymple](https://github.com/relic-se)
 
-### The Fruit Jam Screensaver Bundle
+### ![SS Bundle icon](https://raw.githubusercontent.com/ZContent/Fruit_Jam_SS_Bundle/main/icon.bmp) SS Bundle
 
 A bundle of Screensavers for use with the Fruit Jam OS
 
@@ -195,3 +195,11 @@ hypotrochoid spiral drawing thing for Fruit Jam
 - Latest Release: [Download](https://github.com/samblenny/fruit-jam-spirals/releases/latest)
 - Code Repository: [samblenny/fruit-jam-spirals](https://github.com/samblenny/fruit-jam-spirals)
 - Author: [Sam Blenny](https://github.com/samblenny)
+
+### ![Video Looper icon](https://raw.githubusercontent.com/relic-se/Fruit_Jam_VideoLooper/main/icon.bmp) Video Looper
+
+Turn your Adafruit Fruit Jam into a looping video (GIF) playback device.
+
+- Latest Release: [Download](https://github.com/relic-se/Fruit_Jam_VideoLooper/releases/latest)
+- Code Repository: [relic-se/Fruit_Jam_VideoLooper](https://github.com/relic-se/Fruit_Jam_VideoLooper)
+- Author: [Cooper Dalrymple](https://github.com/relic-se)
